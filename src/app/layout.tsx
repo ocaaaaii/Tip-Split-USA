@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { Playfair_Display } from 'next/font/google';
 import './globals.css';
 import ThemeInitializer from '@/components/ThemeInitializer';
+import InstallBanner from '@/components/InstallBanner';
 
 const playfair = Playfair_Display({
   subsets: ['latin'],
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="app-shell">
           {children}
         </div>
+        <InstallBanner />
       </body>
     </html>
   );

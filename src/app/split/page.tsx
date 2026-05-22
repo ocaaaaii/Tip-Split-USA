@@ -119,7 +119,25 @@ export default function SplitPage() {
               </div>
             </div>
 
-            {/* Per person highlight */}
+            {/* Quick-select chips */}
+            <div className="flex gap-2 mb-4">
+              {[2, 3, 4, 5, 6, 8].map((n) => (
+                <button
+                  key={n}
+                  onClick={() => setGuestCount(n)}
+                  className={clsx(
+                    'flex-1 py-1.5 rounded-lg text-sm font-bold transition-all active:scale-90',
+                    guestCount === n
+                      ? 'bg-accent-warm text-white shadow-sm'
+                      : 'bg-cream-bg border border-cream-border text-mocha-mid hover:border-accent-warm/50'
+                  )}
+                >
+                  {n}
+                </button>
+              ))}
+            </div>
+
+          {/* Per person highlight */}
             <div
               className="rounded-xl p-4 text-center"
               style={{ background: 'linear-gradient(135deg, #688DA5 0%, #5A7A92 100%)' }}

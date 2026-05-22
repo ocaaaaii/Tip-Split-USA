@@ -13,11 +13,10 @@ export default function AppFooter() {
       }}
     >
       <p style={{ fontSize: '11px', color: 'var(--mocha-light)', marginBottom: '6px', opacity: 0.7 }}>
-        Developed with by{' '}
-        <span style={{ fontWeight: 600 }}>CA &amp; SC</span>
+        Developed with &#9825; by <span style={{ fontWeight: 600 }}>CA &amp; SC</span>
       </p>
       <p style={{ fontSize: '10px', color: 'var(--mocha-light)', opacity: 0.45, letterSpacing: '0.04em' }}>
-        © {year} TipSplit USA · All rights reserved.
+        &copy; {year} TipSplit USA &middot; All rights reserved.
       </p>
     </footer>
   );

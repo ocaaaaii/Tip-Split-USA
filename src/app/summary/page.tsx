@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import BottomNav from '@/components/BottomNav';
@@ -13,6 +13,7 @@ import HeaderBanner from '@/components/HeaderBanner';
 import HistorySheet from '@/components/HistorySheet';
 import { saveBill } from '@/lib/history';
 import QRCodeCanvas from '@/components/QRCodeCanvas';
+import html2canvas from 'html2canvas';
 
 export default function SummaryPage() {
   const router = useRouter();
@@ -54,6 +55,8 @@ export default function SummaryPage() {
   const [copiedAll, setCopiedAll] = useState(false);
   const [showQRFor, setShowQRFor] = useState<string | null>(null);
   const [showPayQR, setShowPayQR] = useState(false);
+  const [capturingId, setCapturingId] = useState<string | null>(null);
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const s = translations.summary;
   const fmtUSD = (n: number) => `$${n.toFixed(2)}`;
@@ -139,6 +142,38 @@ export default function SummaryPage() {
     }
   };
 
+
+  const shareCardImage = useCallback(async (row: SummaryRow) => {
+    const el = cardRefs.current[row.id];
+    if (!el) return;
+    setCapturingId(row.id);
+    try {
+      const canvas = await html2canvas(el, {
+        backgroundColor: null,
+        scale: 2,
+        useCORS: true,
+        logging: false,
+      });
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], 'tipsplit.png', { type: 'image/png' });
+        if (navigator.canShare?.({ files: [file] })) {
+          await navigator.share({ files: [file], title: 'TipSplit USA' });
+        } else {
+          // fallback: download
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url; a.download = 'tipsplit.png'; a.click();
+          URL.revokeObjectURL(url);
+        }
+      }, 'image/png');
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setCapturingId(null);
+    }
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen bg-cream-bg pb-28">
       <HeaderBanner />
@@ -190,7 +225,8 @@ export default function SummaryPage() {
         <div className="space-y-3">
           {rows.map((row, idx) => (
             <div
-              key={row.id}
+  key={row.id}
+              ref={(el) => { cardRefs.current[row.id] = el; }}
               className="rounded-xl2 overflow-hidden animate-slide-up"
               style={{
                 background: 'var(--cream-card)', border: '1px solid var(--cream-border)',
@@ -260,6 +296,14 @@ export default function SummaryPage() {
                     )}
                   >
                     {copiedId === row.id ? t(s.copied, lang) : t(s.copyDetail, lang)}
+                  </button>
+                  <button
+                    onClick={() => shareCardImage(row)}
+                    disabled={capturingId === row.id}
+                    className="px-3 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 flex items-center gap-1 bg-cream-deep border border-cream-border text-mocha-mid hover:border-accent-warm/50"
+                    title={lang === 'zh' || lang === 'sc' ? '截圖分享' : 'Share as image'}
+                  >
+                    {capturingId === row.id ? '⏳' : '🖼️'}
                   </button>
                   <button
                     onClick={() => setShowQRFor(showQRFor === row.id ? null : row.id)}
@@ -401,6 +445,9 @@ export default function SummaryPage() {
                 />
                 <p className="text-[10px] text-mocha-light opacity-60">
                   {lang === 'zh' || lang === 'sc' ? '任意金額，感謝你的支持 ♡' : 'Any amount — thank you so much ♡'}
+                </p>
+                <p className="text-[10px] font-medium mt-0.5" style={{ color: 'var(--accent-orange)', opacity: 0.85 }}>
+                  {lang === 'zh' || lang === 'sc' ? '⚠️ 中國信託銀行帳戶，僅限台灣用戶使用' : '⚠️ CTBC Bank (Taiwan) · TW users only'}
                 </p>
               </div>
             </div>

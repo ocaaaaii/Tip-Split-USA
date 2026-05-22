@@ -61,17 +61,6 @@ export default function BottomNav() {
             );
           })}
         </div>
-        <p style={{
-          textAlign: 'center',
-          fontSize: '9px',
-          letterSpacing: '0.08em',
-          color: 'var(--mocha-light)',
-          opacity: 0.45,
-          marginTop: '4px',
-          pointerEvents: 'none',
-        }}>
-          developed by CA & SC
-        </p>
       </div>
     </nav>
   );
