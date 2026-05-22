@@ -220,6 +220,12 @@ button { transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1), background 
 .stagger > *:nth-child(1)  { animation-delay: 0.03s; }
 .stagger > *:nth-child(2)  { animation-delay: 0.07s; }
 .stagger > *:nth-child(3)  { animation-delay: 0.11s; }
+
+/* ── Spinner (GPS loading) ── */
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
 /* ═══════════════════════════════════════════════════════════════════
    DARK MODE — Tailwind utility class overrides
    Tailwind hardcodes light-mode hex values in generated CSS.

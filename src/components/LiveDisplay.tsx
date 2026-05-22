@@ -5,7 +5,11 @@ import { convertFromUSD, formatCurrency, CURRENCY_LABELS } from '@/lib/currency'
 import { t, translations } from '@/lib/i18n';
 import { useEffect, useRef, useState } from 'react';
 
-export default function LiveDisplay() {
+interface Props {
+  onEditTax?: () => void;
+}
+
+export default function LiveDisplay({ onEditTax }: Props) {
   const {
     subtotal, taxAmount, tipAmount, totalAmount, tipPercent,
     isTaxInclusive, displayCurrency, exchangeRates,
@@ -39,14 +43,17 @@ export default function LiveDisplay() {
     {
       label: isTaxInclusive ? t(d.subtotal, lang) : t(d.billAmount, lang),
       usd: fmtUSD(subtotal), foreign: fmtForeign(subtotal),
+      isEditable: false,
     },
     {
       label: `Tax (${taxRate}%)`,
       usd: `+${fmtUSD(taxAmount)}`, foreign: `+${fmtForeign(taxAmount)}`,
+      isEditable: true,
     },
     {
       label: `Tip (${tipPercent}%)`,
       usd: `+${fmtUSD(tipAmount)}`, foreign: `+${fmtForeign(tipAmount)}`,
+      isEditable: false,
     },
   ];
 
@@ -63,10 +70,43 @@ export default function LiveDisplay() {
       <div className="space-y-1.5 mb-3">
         {rows.map((row) => (
           <div key={`${row.label}-${rowKey}`} className="flex items-center justify-between count-slide">
-            <span className="text-sm text-mocha-mid">{row.label}</span>
+            <div className="flex items-center gap-1.5">
+              <span className="text-sm text-mocha-mid">{row.label}</span>
+              {row.isEditable && onEditTax && (
+                <button
+                  onClick={onEditTax}
+                  title="Adjust tax rate"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    border: '1px solid var(--cream-border)',
+                    background: 'var(--cream-bg)',
+                    color: 'var(--mocha-light)',
+                    fontSize: '10px',
+                    cursor: 'pointer',
+                    flexShrink: 0,
+                    transition: 'background 0.15s, color 0.15s',
+                  }}
+                  onMouseEnter={e => {
+                    (e.currentTarget as HTMLButtonElement).style.background = 'var(--accent-warm)';
+                    (e.currentTarget as HTMLButtonElement).style.color = '#fff';
+                  }}
+                  onMouseLeave={e => {
+                    (e.currentTarget as HTMLButtonElement).style.background = 'var(--cream-bg)';
+                    (e.currentTarget as HTMLButtonElement).style.color = 'var(--mocha-light)';
+                  }}
+                >
+                  ✏️
+                </button>
+              )}
+            </div>
             <div className="text-right">
               <span className="text-sm font-semibold text-mocha-dark">{row.usd}</span>
-              <span className="text-xs text-mocha-light ml-2">{row.foreign}</span>
+              {showForeign && <span className="text-xs text-mocha-light ml-2">{row.foreign}</span>}
             </div>
           </div>
         ))}
