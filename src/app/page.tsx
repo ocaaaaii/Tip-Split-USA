@@ -105,7 +105,8 @@ export default function HomePage() {
             <div className="flex items-baseline justify-center gap-1">
               <span className="text-4xl font-light text-mocha-light">$</span>
               <span
-                className="font-bold text-mocha-dark leading-none"
+                key={billAmount}
+                className="font-bold text-mocha-dark leading-none digit-pop"
                 style={{ fontSize: billAmount ? '3rem' : '2.5rem' }}
               >
                 {billAmount || '0.00'}

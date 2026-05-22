@@ -133,7 +133,7 @@ export default function SplitPage() {
           </div>
 
           {/* Per-person cards */}
-          <div className="space-y-2">
+          <div className="space-y-2 stagger">
             {Array.from({ length: guestCount }, (_, i) => {
               const isOwner = i === 0;
               const amount = isOwner ? evenSplit.ownerTotal : evenSplit.perPerson;
@@ -187,5 +187,7 @@ export default function SplitPage() {
 
       <BottomNav />
     </div>
+  );
+}
   );
 }

@@ -14,6 +14,12 @@ export const metadata: Metadata = {
   title: 'TipSplit USA',
   description: 'Smart tip & bill splitter for the US',
   manifest: '/manifest.json',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'TipSplit',
+  },
+  formatDetection: { telephone: false },
 };
 
 export const viewport: Viewport = {
@@ -27,6 +33,15 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="zh-TW" className={playfair.variable}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: `
+          if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+              navigator.serviceWorker.register('/sw.js').catch(function(){});
+            });
+          }
+        `}} />
+      </head>
       <body>
         <div className="app-shell">
           {children}

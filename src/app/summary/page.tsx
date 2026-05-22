@@ -11,6 +11,7 @@ import clsx from 'clsx';
 import HeaderBanner from '@/components/HeaderBanner';
 import HistorySheet from '@/components/HistorySheet';
 import { saveBill } from '@/lib/history';
+import QRCodeCanvas from '@/components/QRCodeCanvas';
 
 export default function SummaryPage() {
   const router = useRouter();
@@ -50,6 +51,7 @@ export default function SummaryPage() {
 
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
+  const [showQRFor, setShowQRFor] = useState<string | null>(null);
 
   const s = translations.summary;
   const fmtUSD = (n: number) => `$${n.toFixed(2)}`;
@@ -104,6 +106,17 @@ export default function SummaryPage() {
     });
     text += `\n📱 TipSplit USA`;
     return text;
+  };
+
+  const buildQRText = (row: SummaryRow) => {
+    const lines = [
+      'TipSplit USA',
+      restaurantName ? restaurantName : '',
+      `${row.name}: ${fmtUSD(row.total)}`,
+      `approx ${fmtForeign(row.total)}`,
+      new Date().toLocaleDateString(),
+    ].filter(Boolean);
+    return lines.join('\n');
   };
 
   const copy = (text: string, id?: string) => {
@@ -232,18 +245,49 @@ export default function SummaryPage() {
                   )}
                 </div>
 
-                {/* Copy button */}
-                <button
-                  onClick={() => copy(buildShareText(row), row.id)}
-                  className={clsx(
-                    'w-full py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95',
-                    copiedId === row.id
-                      ? 'bg-accent-sage text-white'
-                      : 'bg-cream-deep border border-cream-border text-mocha-mid hover:border-accent-warm/50'
-                  )}
-                >
-                  {copiedId === row.id ? t(s.copied, lang) : t(s.copyDetail, lang)}
-                </button>
+                {/* Action buttons row */}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => copy(buildShareText(row), row.id)}
+                    className={clsx(
+                      'flex-1 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95',
+                      copiedId === row.id
+                        ? 'bg-accent-sage text-white'
+                        : 'bg-cream-deep border border-cream-border text-mocha-mid hover:border-accent-warm/50'
+                    )}
+                  >
+                    {copiedId === row.id ? t(s.copied, lang) : t(s.copyDetail, lang)}
+                  </button>
+                  <button
+                    onClick={() => setShowQRFor(showQRFor === row.id ? null : row.id)}
+                    className={clsx(
+                      'px-3 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 flex items-center gap-1',
+                      showQRFor === row.id
+                        ? 'bg-accent-warm text-white'
+                        : 'bg-cream-deep border border-cream-border text-mocha-mid hover:border-accent-warm/50'
+                    )}
+                    title={lang === 'zh' || lang === 'sc' ? 'QR Code' : 'QR Code'}
+                  >
+                    <span className="text-base">&#x25A6;</span>
+                    <span>QR</span>
+                  </button>
+                </div>
+
+                {/* QR Code panel */}
+                {showQRFor === row.id && (
+                  <div className="mt-3 flex flex-col items-center gap-2 animate-slide-up">
+                    <QRCodeCanvas text={buildQRText(row)} size={180} color={row.color} />
+                    <p className="text-xs text-mocha-light text-center">
+                      {lang === 'zh' || lang === 'sc'
+                        ? '讓朋友掃描此 QR Code 確認金額'
+                        : lang === 'ja' ? 'QRコードをスキャンして金額を確認'
+                        : lang === 'ko' ? 'QR 코드를 스캔하여 금액 확인'
+                        : lang === 'es' ? 'Escanea el QR para confirmar el monto'
+                        : lang === 'pt' ? 'Escaneie o QR para confirmar o valor'
+                        : 'Scan to confirm amount owed'}
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           ))}

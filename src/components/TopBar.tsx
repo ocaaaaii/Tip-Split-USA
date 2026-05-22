@@ -19,6 +19,13 @@ const LANGUAGES: { code: Lang; label: string; short: string }[] = [
   { code: 'pt', label: 'Português',short: 'PT'   },
 ];
 
+function formatTime(ts: number): string {
+  const d = new Date(ts);
+  const hh = d.getHours().toString().padStart(2, '0');
+  const mm = d.getMinutes().toString().padStart(2, '0');
+  return `${hh}:${mm}`;
+}
+
 export default function TopBar() {
   const {
     locationName, taxRate, isOffline,
@@ -29,10 +36,16 @@ export default function TopBar() {
 
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
   const [showLangPicker,     setShowLangPicker]     = useState(false);
+  const [ratesIsLive,        setRatesIsLive]        = useState(false);
+  const [ratesFetchedAt,     setRatesFetchedAt]     = useState<number | null>(null);
   const i = translations.topbar;
 
   useEffect(() => {
-    fetchExchangeRates().then(setExchangeRates);
+    fetchExchangeRates().then(({ rates, isLive, fetchedAt }) => {
+      setExchangeRates(rates);
+      setRatesIsLive(isLive);
+      setRatesFetchedAt(fetchedAt);
+    });
   }, [setExchangeRates]);
 
   useEffect(() => {
@@ -70,99 +83,128 @@ export default function TopBar() {
   const currInfo  = CURRENCY_LABELS[displayCurrency];
   const activeLang = LANGUAGES.find(l => l.code === lang)!;
 
+  // Rate freshness label
+  const rateBadge = ratesFetchedAt
+    ? ratesIsLive
+      ? (lang === 'zh' || lang === 'sc' ? `匯率 ${formatTime(ratesFetchedAt)}` : `Rates ${formatTime(ratesFetchedAt)}`)
+      : (lang === 'zh' || lang === 'sc' ? '預設匯率' : lang === 'ja' ? 'デフォルトレート' : lang === 'ko' ? '기본환율' : lang === 'es' ? 'Tasa est.' : lang === 'pt' ? 'Taxa est.' : 'Est. Rate')
+    : null;
+
   return (
-    <div className="px-3 pt-3 pb-2 flex items-center justify-between gap-1.5">
-      {/* Location */}
-      <div className="flex items-center gap-1.5 min-w-0 flex-1">
-        <span className="text-sm flex-shrink-0">{isOffline ? '📍' : '🌐'}</span>
-        <div className="min-w-0">
-          <p className="text-xs font-medium text-mocha-dark truncate leading-tight">{locationName}</p>
-          {isOffline && (
-            <p className="text-xs text-accent-orange leading-tight">{t(i.offlineMode, lang)}</p>
+    <div className="px-3 pt-3 pb-2 flex flex-col gap-1">
+      <div className="flex items-center justify-between gap-1.5">
+        {/* Location */}
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
+          <span className="text-sm flex-shrink-0">{isOffline ? '📍' : '🌐'}</span>
+          <div className="min-w-0">
+            <p className="text-xs font-medium text-mocha-dark truncate leading-tight">{locationName}</p>
+            {isOffline && (
+              <p className="text-xs text-accent-orange leading-tight">{t(i.offlineMode, lang)}</p>
+            )}
+          </div>
+        </div>
+
+        {/* Tax badge */}
+        <div className="flex-shrink-0 px-2 py-1 rounded-lg bg-cream-deep border border-cream-border">
+          <span className="text-xs font-bold text-mocha-mid">{t(i.tax, lang)} {taxRate}%</span>
+        </div>
+
+        {/* Language picker */}
+        <div className="relative flex-shrink-0">
+          <button
+            onClick={() => { setShowLangPicker(!showLangPicker); setShowCurrencyPicker(false); }}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg border border-cream-border bg-cream-card text-xs font-bold text-mocha-mid hover:border-accent-warm/60 transition-colors"
+          >
+            <span>{activeLang.short}</span>
+            <span className="text-mocha-light text-[9px]">{showLangPicker ? '▲' : '▼'}</span>
+          </button>
+
+          {showLangPicker && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowLangPicker(false)} />
+              <div
+                className="absolute top-full right-0 mt-1 rounded-xl overflow-hidden z-50 w-36"
+                style={{ background: '#F7EED8', border: '1px solid #D4B880', boxShadow: '0 8px 24px rgba(61,29,10,0.16)' }}
+              >
+                {LANGUAGES.map((lng) => (
+                  <button
+                    key={lng.code}
+                    onClick={() => { setLang(lng.code); setShowLangPicker(false); }}
+                    className={clsx(
+                      'flex items-center justify-between px-3 py-2.5 w-full text-left text-sm hover:bg-cream-deep transition-colors',
+                      lng.code === lang ? 'text-accent-warm font-bold' : 'text-mocha-dark'
+                    )}
+                  >
+                    <span>{lng.label}</span>
+                    {lng.code === lang && <span className="text-xs text-accent-warm">✓</span>}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        {/* Currency picker */}
+        <div className="relative flex-shrink-0">
+          <button
+            onClick={() => { setShowCurrencyPicker(!showCurrencyPicker); setShowLangPicker(false); }}
+            className="flex items-center gap-1 px-2 py-1 rounded-lg bg-accent-warm text-white text-xs font-bold"
+          >
+            <span>{currInfo.flag}</span>
+            <span>{displayCurrency}</span>
+            <span className="text-white/70 text-[9px]">{showCurrencyPicker ? '▲' : '▼'}</span>
+          </button>
+
+          {showCurrencyPicker && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowCurrencyPicker(false)} />
+              <div
+                className="absolute top-full right-0 mt-1 rounded-xl overflow-hidden z-50 w-44"
+                style={{ background: '#F7EED8', border: '1px solid #D4B880', boxShadow: '0 8px 24px rgba(61,29,10,0.16)' }}
+              >
+                {/* Rate freshness row inside picker */}
+                {rateBadge && (
+                  <div className={clsx(
+                    'flex items-center gap-1.5 px-3 py-2 border-b text-xs',
+                    ratesIsLive
+                      ? 'border-cream-border text-accent-sage'
+                      : 'border-cream-border text-accent-orange'
+                  )}>
+                    <span>{ratesIsLive ? '🟢' : '🟡'}</span>
+                    <span className="font-medium">{rateBadge}</span>
+                  </div>
+                )}
+                {CURRENCIES.map((cur) => {
+                  const info = CURRENCY_LABELS[cur];
+                  return (
+                    <button
+                      key={cur}
+                      onClick={() => { setDisplayCurrency(cur); setShowCurrencyPicker(false); }}
+                      className={clsx(
+                        'flex items-center gap-2 px-3 py-2.5 w-full text-left text-sm hover:bg-cream-deep transition-colors',
+                        cur === displayCurrency ? 'text-accent-warm font-bold' : 'text-mocha-dark'
+                      )}
+                    >
+                      <span>{info.flag}</span>
+                      <span className="font-medium">{info.symbol}</span>
+                      <span className="text-mocha-mid text-xs">{cur}</span>
+                      {cur === displayCurrency && <span className="ml-auto text-accent-warm text-xs">✓</span>}
+                    </button>
+                  );
+                })}
+              </div>
+            </>
           )}
         </div>
       </div>
 
-      {/* Tax badge */}
-      <div className="flex-shrink-0 px-2 py-1 rounded-lg bg-cream-deep border border-cream-border">
-        <span className="text-xs font-bold text-mocha-mid">{t(i.tax, lang)} {taxRate}%</span>
-      </div>
-
-      {/* Language picker */}
-      <div className="relative flex-shrink-0">
-        <button
-          onClick={() => { setShowLangPicker(!showLangPicker); setShowCurrencyPicker(false); }}
-          className="flex items-center gap-1 px-2 py-1 rounded-lg border border-cream-border bg-cream-card text-xs font-bold text-mocha-mid hover:border-accent-warm/60 transition-colors"
-        >
-          <span>{activeLang.short}</span>
-          <span className="text-mocha-light text-[9px]">{showLangPicker ? '▲' : '▼'}</span>
-        </button>
-
-        {showLangPicker && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setShowLangPicker(false)} />
-            <div
-              className="absolute top-full right-0 mt-1 rounded-xl overflow-hidden z-50 w-36"
-              style={{ background: '#F7EED8', border: '1px solid #D4B880', boxShadow: '0 8px 24px rgba(61,29,10,0.16)' }}
-            >
-              {LANGUAGES.map((lng) => (
-                <button
-                  key={lng.code}
-                  onClick={() => { setLang(lng.code); setShowLangPicker(false); }}
-                  className={clsx(
-                    'flex items-center justify-between px-3 py-2.5 w-full text-left text-sm hover:bg-cream-deep transition-colors',
-                    lng.code === lang ? 'text-accent-warm font-bold' : 'text-mocha-dark'
-                  )}
-                >
-                  <span>{lng.label}</span>
-                  {lng.code === lang && <span className="text-xs text-accent-warm">✓</span>}
-                </button>
-              ))}
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Currency picker */}
-      <div className="relative flex-shrink-0">
-        <button
-          onClick={() => { setShowCurrencyPicker(!showCurrencyPicker); setShowLangPicker(false); }}
-          className="flex items-center gap-1 px-2 py-1 rounded-lg bg-accent-warm text-white text-xs font-bold"
-        >
-          <span>{currInfo.flag}</span>
-          <span>{displayCurrency}</span>
-          <span className="text-white/70 text-[9px]">{showCurrencyPicker ? '▲' : '▼'}</span>
-        </button>
-
-        {showCurrencyPicker && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setShowCurrencyPicker(false)} />
-            <div
-              className="absolute top-full right-0 mt-1 rounded-xl overflow-hidden z-50 w-44"
-              style={{ background: '#F7EED8', border: '1px solid #D4B880', boxShadow: '0 8px 24px rgba(61,29,10,0.16)' }}
-            >
-              {CURRENCIES.map((cur) => {
-                const info = CURRENCY_LABELS[cur];
-                return (
-                  <button
-                    key={cur}
-                    onClick={() => { setDisplayCurrency(cur); setShowCurrencyPicker(false); }}
-                    className={clsx(
-                      'flex items-center gap-2 px-3 py-2.5 w-full text-left text-sm hover:bg-cream-deep transition-colors',
-                      cur === displayCurrency ? 'text-accent-warm font-bold' : 'text-mocha-dark'
-                    )}
-                  >
-                    <span>{info.flag}</span>
-                    <span className="font-medium">{info.symbol}</span>
-                    <span className="text-mocha-mid text-xs">{cur}</span>
-                    {cur === displayCurrency && <span className="ml-auto text-accent-warm text-xs">✓</span>}
-                  </button>
-                );
-              })}
-            </div>
-          </>
-        )}
-      </div>
+      {/* Rate freshness strip (shown below topbar row when offline) */}
+      {rateBadge && !ratesIsLive && (
+        <div className="flex items-center gap-1.5 px-1 animate-fade-in">
+          <span className="text-[10px]">🟡</span>
+          <p className="text-[10px] text-accent-orange font-medium">{rateBadge}</p>
+        </div>
+      )}
     </div>
   );
 }

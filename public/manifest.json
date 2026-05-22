@@ -1,21 +1,41 @@
 {
   "name": "TipSplit USA",
   "short_name": "TipSplit",
-  "description": "美國小費與分帳萬能助手",
+  "description": "美國小費與分帳萬能助手 · Smart tip & bill splitter",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait",
   "background_color": "#EDE0C0",
   "theme_color": "#EDE0C0",
+  "categories": ["utilities", "finance"],
+  "lang": "zh-TW",
   "icons": [
     {
       "src": "/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
       "src": "/icon-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Calculator",
+      "short_name": "Calc",
+      "url": "/",
+      "description": "Open tip calculator"
+    },
+    {
+      "name": "Split Bill",
+      "short_name": "Split",
+      "url": "/split",
+      "description": "Split bill between guests"
     }
   ]
 }

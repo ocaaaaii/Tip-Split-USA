@@ -14,6 +14,38 @@
   --accent-orange:#C4581A;
 }
 
+/* ── Dark mode: Maillard 焦糖深色版 ── */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --cream-bg:     #1C1209;
+    --cream-card:   #261A0E;
+    --cream-border: #3D2A14;
+    --mocha-dark:   #F2E4C4;
+    --mocha-mid:    #C8A87A;
+    --mocha-light:  #8A6A48;
+    --accent-warm:  #7EAAC4;
+    --accent-sage:  #8FBE93;
+    --accent-orange:#E07040;
+  }
+  html { background-color: var(--cream-bg); }
+  body { background-color: var(--cream-bg); color: var(--mocha-dark); }
+  .card {
+    background: var(--cream-card);
+    border-color: var(--cream-border);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  }
+  /* Desktop dot pattern in dark mode */
+  @media (min-width: 768px) {
+    body {
+      background-image: radial-gradient(circle, #3D2A14 1px, transparent 1px);
+    }
+  }
+  /* Skeleton shimmer dark */
+  .skeleton {
+    background: linear-gradient(90deg, #2A1A0A 25%, #3A260E 50%, #2A1A0A 75%);
+  }
+}
+
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 html { scroll-behavior: smooth; background-color: var(--cream-bg); }
 body {
@@ -125,12 +157,32 @@ button { transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1), background 
 }
 .animate-fade-in { animation: fadeIn 0.3s ease-out forwards; }
 
-/* ── Stagger children ── */
-.stagger > *:nth-child(1) { animation-delay: 0.04s; opacity:0; animation-fill-mode:forwards; }
-.stagger > *:nth-child(2) { animation-delay: 0.09s; opacity:0; animation-fill-mode:forwards; }
-.stagger > *:nth-child(3) { animation-delay: 0.14s; opacity:0; animation-fill-mode:forwards; }
-.stagger > *:nth-child(4) { animation-delay: 0.19s; opacity:0; animation-fill-mode:forwards; }
-.stagger > *:nth-child(5) { animation-delay: 0.24s; opacity:0; animation-fill-mode:forwards; }
+/* ── Stagger children (each child plays slideUp with an incremental delay) ── */
+.stagger > * {
+  animation-name: slideUp;
+  animation-duration: 0.28s;
+  animation-timing-function: cubic-bezier(0.22,1,0.36,1);
+  animation-fill-mode: both;
+  opacity: 0;
+}
+.stagger > *:nth-child(1)  { animation-delay: 0.03s; }
+.stagger > *:nth-child(2)  { animation-delay: 0.07s; }
+.stagger > *:nth-child(3)  { animation-delay: 0.11s; }
+.stagger > *:nth-child(4)  { animation-delay: 0.15s; }
+.stagger > *:nth-child(5)  { animation-delay: 0.19s; }
+.stagger > *:nth-child(6)  { animation-delay: 0.23s; }
+.stagger > *:nth-child(7)  { animation-delay: 0.27s; }
+.stagger > *:nth-child(8)  { animation-delay: 0.30s; }
+.stagger > *:nth-child(9)  { animation-delay: 0.33s; }
+.stagger > *:nth-child(10) { animation-delay: 0.36s; }
+
+/* ── Count-up: bill amount digit pop ── */
+@keyframes digitPop {
+  0%   { opacity: 0.4; transform: translateY(8px) scale(0.96); }
+  60%  { transform: translateY(-2px) scale(1.02); }
+  100% { opacity: 1;   transform: translateY(0)  scale(1);    }
+}
+.digit-pop { animation: digitPop 0.2s cubic-bezier(0.22,1,0.36,1) forwards; }
 
 /* ── Shimmer skeleton ── */
 @keyframes shimmer {

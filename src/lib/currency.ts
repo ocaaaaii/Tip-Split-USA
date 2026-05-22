@@ -4,16 +4,16 @@
 export type CurrencyCode = 'USD' | 'TWD' | 'CNY' | 'JPY' | 'EUR' | 'HKD' | 'KRW' | 'BRL' | 'MXN' | 'SGD';
 
 export const CURRENCY_LABELS: Record<CurrencyCode, { label: string; symbol: string; flag: string }> = {
-  USD: { label: 'US Dollar',        symbol: '$',    flag: '🇺🇸' },
-  TWD: { label: '台幣',             symbol: 'NT$',  flag: '🇹🇼' },
-  CNY: { label: '人民幣',           symbol: '¥',    flag: '🇨🇳' },
-  JPY: { label: '日圓',             symbol: '¥',    flag: '🇯🇵' },
-  EUR: { label: 'Euro',             symbol: '€',    flag: '🇪🇺' },
-  HKD: { label: '港幣',             symbol: 'HK$',  flag: '🇭🇰' },
-  KRW: { label: '韓圓',             symbol: '₩',    flag: '🇰🇷' },
-  BRL: { label: 'Real Brasileiro',  symbol: 'R$',   flag: '🇧🇷' },
-  MXN: { label: 'Peso Mexicano',    symbol: 'MX$',  flag: '🇲🇽' },
-  SGD: { label: 'Singapore Dollar', symbol: 'S$',   flag: '🇸🇬' },
+  USD: { label: 'US Dollar',        symbol: '$',    flag: '\u{1F1FA}\u{1F1F8}' },
+  TWD: { label: '台幣',     symbol: 'NT$',  flag: '\u{1F1F9}\u{1F1FC}' },
+  CNY: { label: '人民幣', symbol: '¥', flag: '\u{1F1E8}\u{1F1F3}' },
+  JPY: { label: '日圓',     symbol: '¥', flag: '\u{1F1EF}\u{1F1F5}' },
+  EUR: { label: 'Euro',             symbol: '€', flag: '\u{1F1EA}\u{1F1FA}' },
+  HKD: { label: '港幣',     symbol: 'HK$',  flag: '\u{1F1ED}\u{1F1F0}' },
+  KRW: { label: '韓圓',     symbol: '₩', flag: '\u{1F1F0}\u{1F1F7}' },
+  BRL: { label: 'Real Brasileiro',  symbol: 'R$',   flag: '\u{1F1E7}\u{1F1F7}' },
+  MXN: { label: 'Peso Mexicano',    symbol: 'MX$',  flag: '\u{1F1F2}\u{1F1FD}' },
+  SGD: { label: 'Singapore Dollar', symbol: 'S$',   flag: '\u{1F1F8}\u{1F1EC}' },
 };
 
 export const FALLBACK_RATES: Record<CurrencyCode, number> = {
@@ -31,12 +31,19 @@ export const FALLBACK_RATES: Record<CurrencyCode, number> = {
 
 let cachedRates: Record<string, number> | null = null;
 let lastFetchTime = 0;
+let lastFetchIsLive = false;
 const CACHE_TTL = 60 * 60 * 1000;
 
-export async function fetchExchangeRates(): Promise<Record<CurrencyCode, number>> {
+export interface RateResult {
+  rates: Record<CurrencyCode, number>;
+  isLive: boolean;
+  fetchedAt: number;
+}
+
+export async function fetchExchangeRates(): Promise<RateResult> {
   const now = Date.now();
   if (cachedRates && now - lastFetchTime < CACHE_TTL) {
-    return cachedRates as Record<CurrencyCode, number>;
+    return { rates: cachedRates as Record<CurrencyCode, number>, isLive: lastFetchIsLive, fetchedAt: lastFetchTime };
   }
   try {
     const res = await fetch(
@@ -62,9 +69,11 @@ export async function fetchExchangeRates(): Promise<Record<CurrencyCode, number>
     };
     cachedRates = rates;
     lastFetchTime = now;
-    return rates;
+    lastFetchIsLive = true;
+    return { rates, isLive: true, fetchedAt: now };
   } catch {
-    return FALLBACK_RATES;
+    lastFetchIsLive = false;
+    return { rates: FALLBACK_RATES, isLive: false, fetchedAt: now };
   }
 }
 
