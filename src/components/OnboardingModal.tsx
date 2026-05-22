@@ -27,7 +27,7 @@ const SLIDES: Record<Lang, SlideContent[]> = {
     {
       icon: '\u{1F9EE}',
       title: '歡迎使用 TipSplit USA',
-      body: '第一個穯小費計算 App，專為在美國消費的你設計。先選擇你的語言！',
+      body: '第一名的小費計算 App，專為在美國消費的你設計。先選擇你的語言！',
       hint: '上方選擇語言',
     },
     {
