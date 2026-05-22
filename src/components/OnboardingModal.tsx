@@ -7,9 +7,9 @@ import type { Lang } from '@/lib/i18n';
 interface Props { onDone: () => void; }
 
 const LANGUAGES: { code: Lang; label: string; flag: string }[] = [
+  { code: 'en', label: 'English',     flag: '\u{1F1FA}\u{1F1F8}' },
   { code: 'zh', label: '繁體中文', flag: '\u{1F1F9}\u{1F1FC}' },
   { code: 'sc', label: '简体中文', flag: '\u{1F1E8}\u{1F1F3}' },
-  { code: 'en', label: 'English',     flag: '\u{1F1FA}\u{1F1F8}' },
   { code: 'ja', label: '日本語',   flag: '\u{1F1EF}\u{1F1F5}' },
   { code: 'ko', label: '한국어',   flag: '\u{1F1F0}\u{1F1F7}' },
   { code: 'es', label: 'Español',  flag: '\u{1F1EA}\u{1F1F8}' },
