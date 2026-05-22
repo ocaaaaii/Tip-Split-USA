@@ -191,7 +191,7 @@ export default function SummaryPage() {
               key={row.id}
               className="rounded-xl2 overflow-hidden animate-slide-up"
               style={{
-                background: '#F7EED8', border: '1px solid #D4B880',
+                background: 'var(--cream-card)', border: '1px solid var(--cream-border)',
                 boxShadow: '0 2px 12px rgba(61,29,10,0.08)',
                 animationDelay: `${idx * 60}ms`,
               }}
