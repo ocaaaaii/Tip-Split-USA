@@ -60,8 +60,8 @@ function round2(n: number): number {
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  lang: 'en' as Lang,
-  setLang: (l) => set({ lang: l }),
+  lang: (typeof window !== 'undefined' ? (localStorage.getItem('tipsplit_lang') as Lang | null) : null) ?? 'en' as Lang,
+  setLang: (l) => { if (typeof window !== 'undefined') localStorage.setItem('tipsplit_lang', l); set({ lang: l }); },
   theme: (typeof window !== 'undefined' ? (localStorage.getItem('tipsplit_theme') as Theme | null) : null) ?? 'system',
   setTheme: (t) => {
     if (typeof window !== 'undefined') localStorage.setItem('tipsplit_theme', t);
@@ -81,7 +81,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   customTipMode: false,
   scenario: 'restaurant',
   guestCount: 2,
-  displayCurrency: 'NONE',
+  displayCurrency: (typeof window !== 'undefined' ? (localStorage.getItem('tipsplit_currency') as CurrencyCode | null) : null) ?? 'NONE' as CurrencyCode,
   exchangeRates: FALLBACK_RATES,
   subtotal: 0,
   taxAmount: 0,
@@ -99,7 +99,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   setCustomTipMode: (v) => set({ customTipMode: v }),
   setScenario: (s) => set({ scenario: s }),
   setGuestCount: (n) => set({ guestCount: n }),
-  setDisplayCurrency: (c) => set({ displayCurrency: c }),
+  setDisplayCurrency: (c) => { if (typeof window !== 'undefined') localStorage.setItem('tipsplit_currency', c); set({ displayCurrency: c }); },
   setExchangeRates: (r) => set({ exchangeRates: r }),
   setSplitMode: (m) => set({ splitMode: m }),
   setParticipants: (p) => set({ participants: p }),
