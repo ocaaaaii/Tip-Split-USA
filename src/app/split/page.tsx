@@ -189,6 +189,3 @@ export default function SplitPage() {
     </div>
   );
 }
-  );
-}
-
