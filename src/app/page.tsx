@@ -13,6 +13,7 @@ import { t, translations, type Lang } from '@/lib/i18n';
 import clsx from 'clsx';
 import HeaderBanner from '@/components/HeaderBanner';
 import TipCultureModal from '@/components/TipCultureModal';
+import OnboardingModal from '@/components/OnboardingModal';
 
 export default function HomePage() {
   const {
@@ -27,6 +28,15 @@ export default function HomePage() {
   const [isCustomMode, setIsCustomMode] = useState(false);
   const [showGuestWarning, setShowGuestWarning] = useState(false);
   const [showTipCulture, setShowTipCulture] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return !localStorage.getItem('tipsplit_onboarded_v1');
+  });
+
+  const handleOnboardingDone = () => {
+    localStorage.setItem('tipsplit_onboarded_v1', '1');
+    setShowOnboarding(false);
+  };
 
   const c = translations.calc;
   const quickTips = getScenarioQuickTips(scenario);
@@ -55,6 +65,7 @@ export default function HomePage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-cream-bg pb-28">
+      {showOnboarding && <OnboardingModal onDone={handleOnboardingDone} />}
       <HeaderBanner />
       <TopBar />
 
