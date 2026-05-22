@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import BottomNav from '@/components/BottomNav';
+import AppFooter from '@/components/AppFooter';
 import HeaderBanner from '@/components/HeaderBanner';
 import { getBillHistory, SCENARIO_ICONS } from '@/lib/history';
 import type { BillRecord } from '@/lib/history';
@@ -332,6 +333,7 @@ export default function StatsPage() {
         </a>
       </div>
 
+      <AppFooter />
       <BottomNav />
     </div>
   );

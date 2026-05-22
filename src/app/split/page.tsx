@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import BottomNav from '@/components/BottomNav';
+import AppFooter from '@/components/AppFooter';
 import { calculateEvenSplit } from '@/lib/splitAlgorithm';
 import { convertFromUSD, formatCurrency, CURRENCY_LABELS } from '@/lib/currency';
 import { t, translations } from '@/lib/i18n';
@@ -188,6 +189,7 @@ export default function SplitPage() {
         </div>
       )}
 
+      <AppFooter />
       <BottomNav />
     </div>
   );

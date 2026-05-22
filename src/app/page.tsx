@@ -8,6 +8,7 @@ import NumberPad from '@/components/NumberPad';
 import LiveDisplay from '@/components/LiveDisplay';
 import AlertBanner from '@/components/AlertBanner';
 import BottomNav from '@/components/BottomNav';
+import AppFooter from '@/components/AppFooter';
 import { TAX_DATA, getTaxByGeo } from '@/data/taxRates';
 import { t, translations, type Lang } from '@/lib/i18n';
 import clsx from 'clsx';
@@ -259,6 +260,7 @@ export default function HomePage() {
         />
       )}
 
+      <AppFooter />
       <BottomNav />
     </div>
   );

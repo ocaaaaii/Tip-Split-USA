@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import BottomNav from '@/components/BottomNav';
+import AppFooter from '@/components/AppFooter';
 import { calculateItemizedSplit, calculateEvenSplit } from '@/lib/splitAlgorithm';
 import { convertFromUSD, formatCurrency, CURRENCY_LABELS } from '@/lib/currency';
 import { t, translations } from '@/lib/i18n';
@@ -52,6 +53,7 @@ export default function SummaryPage() {
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [copiedAll, setCopiedAll] = useState(false);
   const [showQRFor, setShowQRFor] = useState<string | null>(null);
+  const [showPayQR, setShowPayQR] = useState(false);
 
   const s = translations.summary;
   const fmtUSD = (n: number) => `$${n.toFixed(2)}`;
@@ -338,7 +340,7 @@ export default function SummaryPage() {
         </div>
 
 
-        {/* ☕ Ko-fi support card */}
+        {/* ☕ Ko-fi + Bank QR support card */}
         <div className="card p-4 text-center" style={{ borderStyle: 'dashed' }}>
           <p className="text-2xl mb-1">☕</p>
           <p className="font-semibold text-mocha-dark text-sm mb-0.5">
@@ -349,16 +351,62 @@ export default function SummaryPage() {
               ? '如果覺得有幫助，請我們喝杯咖啡 ☺'
               : 'If it helped, buy us a coffee — it keeps the app going!'}
           </p>
-          <a
-            href="https://ko-fi.com/tipsplit"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white active:scale-95 transition-transform"
-            style={{ background: 'linear-gradient(135deg, #FF5E5B 0%, #FF8C42 100%)' }}
-          >
-            ☕ {lang === 'zh' || lang === 'sc' ? '請我們喝咖啡' : 'Buy us a coffee'}
-          </a>
-          <p className="text-[10px] text-mocha-light mt-2 opacity-60">ko-fi.com/tipsplit</p>
+
+          {/* Buttons row */}
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <a
+              href="https://ko-fi.com/tipsplit"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white active:scale-95 transition-transform"
+              style={{ background: 'linear-gradient(135deg, #FF5E5B 0%, #FF8C42 100%)' }}
+            >
+              ☕ {lang === 'zh' || lang === 'sc' ? '請我們喝咖啡' : 'Buy us a coffee'}
+            </a>
+            <button
+              onClick={() => setShowPayQR(!showPayQR)}
+              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl font-bold text-sm active:scale-95 transition-all"
+              style={{
+                background: showPayQR ? 'var(--accent-sage)' : 'var(--cream-bg)',
+                color: showPayQR ? '#fff' : 'var(--mocha-mid)',
+                border: '1px solid var(--cream-border)',
+              }}
+            >
+              <span>🏦</span>
+              <span>{lang === 'zh' || lang === 'sc' ? '銀行轉帳' : 'Bank Transfer'}</span>
+            </button>
+          </div>
+
+          {/* Bank QR expandable */}
+          {showPayQR && (
+            <div className="mt-4 animate-slide-up">
+              <div
+                className="rounded-xl p-4 flex flex-col items-center gap-2"
+                style={{ background: 'var(--cream-bg)', border: '1px solid var(--cream-border)' }}
+              >
+                <p className="text-xs font-semibold text-mocha-mid">
+                  {lang === 'zh' || lang === 'sc' ? '掃描 QR Code 轉帳支持我們 🙏' : 'Scan to support us via bank transfer 🙏'}
+                </p>
+                <img
+                  src="/pay-qr.png"
+                  alt="Bank payment QR code"
+                  style={{
+                    width: '180px',
+                    height: '180px',
+                    objectFit: 'contain',
+                    borderRadius: '12px',
+                    background: '#fff',
+                    padding: '8px',
+                  }}
+                />
+                <p className="text-[10px] text-mocha-light opacity-60">
+                  {lang === 'zh' || lang === 'sc' ? '任意金額，感謝你的支持 ♡' : 'Any amount — thank you so much ♡'}
+                </p>
+              </div>
+            </div>
+          )}
+
+          <p className="text-[10px] text-mocha-light mt-3 opacity-60">ko-fi.com/tipsplit</p>
         </div>
         {/* Start over */}
         <button
@@ -373,6 +421,7 @@ export default function SummaryPage() {
         <HistorySheet onClose={() => setShowHistory(false)} />
       )}
 
+      <AppFooter />
       <BottomNav />
     </div>
   );
