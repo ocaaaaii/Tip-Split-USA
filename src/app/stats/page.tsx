@@ -319,6 +319,19 @@ export default function StatsPage() {
         </div>
       )}
 
+      {/* Ko-fi subtle footer */}
+      <div className="px-4 pb-2 text-center">
+        <a
+          href="https://ko-fi.com/tipsplit"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 text-xs text-mocha-light hover:text-mocha-mid transition-colors"
+        >
+          <span>☕</span>
+          <span>Enjoy TipSplit? Buy us a coffee</span>
+        </a>
+      </div>
+
       <BottomNav />
     </div>
   );

@@ -337,6 +337,29 @@ export default function SummaryPage() {
           </div>
         </div>
 
+
+        {/* ☕ Ko-fi support card */}
+        <div className="card p-4 text-center" style={{ borderStyle: 'dashed' }}>
+          <p className="text-2xl mb-1">☕</p>
+          <p className="font-semibold text-mocha-dark text-sm mb-0.5">
+            {lang === 'zh' || lang === 'sc' ? 'TipSplit 幫你省了尷尬？' : 'Did TipSplit save the awkward math?'}
+          </p>
+          <p className="text-xs text-mocha-light mb-3">
+            {lang === 'zh' || lang === 'sc'
+              ? '如果覺得有幫助，請我們喝杯咖啡 ☺'
+              : 'If it helped, buy us a coffee — it keeps the app going!'}
+          </p>
+          <a
+            href="https://ko-fi.com/tipsplit"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-sm text-white active:scale-95 transition-transform"
+            style={{ background: 'linear-gradient(135deg, #FF5E5B 0%, #FF8C42 100%)' }}
+          >
+            ☕ {lang === 'zh' || lang === 'sc' ? '請我們喝咖啡' : 'Buy us a coffee'}
+          </a>
+          <p className="text-[10px] text-mocha-light mt-2 opacity-60">ko-fi.com/tipsplit</p>
+        </div>
         {/* Start over */}
         <button
           onClick={() => router.push('/')}
