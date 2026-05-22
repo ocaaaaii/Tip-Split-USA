@@ -145,23 +145,6 @@ export default function LiveDisplay({ onEditTax }: Props) {
           )}
         </div>
       </div>
-
-      {/* ── Change tax rate footer link ── */}
-      {onEditTax && (
-        <>
-          <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, var(--cream-border), transparent)', margin: '10px 0' }} />
-          <button
-            onClick={onEditTax}
-            className="w-full flex items-center justify-center gap-1.5 py-1 text-xs font-medium transition-colors active:scale-95"
-            style={{ color: 'var(--mocha-light)' }}
-            onMouseEnter={e => (e.currentTarget.style.color = 'var(--accent-warm)')}
-            onMouseLeave={e => (e.currentTarget.style.color = 'var(--mocha-light)')}
-          >
-            <span>🗺️</span>
-            <span>{lang === 'zh' || lang === 'sc' ? '切換城市／地區稅率' : 'Change tax rate by city / area'}</span>
-          </button>
-        </>
-      )}
     </div>
   );
 }

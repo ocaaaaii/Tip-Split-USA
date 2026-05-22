@@ -75,7 +75,7 @@ export default function HomePage() {
     <div className="flex flex-col min-h-screen bg-cream-bg pb-28">
       {showOnboarding && <OnboardingModal onDone={handleOnboardingDone} />}
       <HeaderBanner />
-      <TopBar />
+      <TopBar onEditTax={() => setShowTaxPicker(true)} />
 
       <div className="px-4 space-y-4">
 
