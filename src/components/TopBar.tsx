@@ -31,7 +31,7 @@ export default function TopBar() {
     locationName, taxRate, isOffline,
     displayCurrency, setDisplayCurrency,
     setLocationName, setTaxRate, setIsOffline, setExchangeRates,
-    lang, setLang,
+    lang, setLang, theme, setTheme,
   } = useAppStore();
 
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
@@ -144,7 +144,19 @@ export default function TopBar() {
           )}
         </div>
 
-        {/* Currency picker */}
+        {/* Theme toggle */}
+        <button
+          onClick={() => {
+            const next = theme === 'system' ? 'dark' : theme === 'dark' ? 'light' : 'system';
+            setTheme(next);
+          }}
+          className="flex-shrink-0 w-8 h-8 rounded-lg border border-cream-border bg-cream-card flex items-center justify-center text-base transition-all active:scale-90 hover:border-accent-warm/60"
+          title={theme === 'dark' ? 'Dark' : theme === 'light' ? 'Light' : 'Auto'}
+        >
+          {theme === 'dark' ? '🌙' : theme === 'light' ? '☀️' : '💻'}
+        </button>
+
+      {/* Currency picker */}
         <div className="relative flex-shrink-0">
           <button
             onClick={() => { setShowCurrencyPicker(!showCurrencyPicker); setShowLangPicker(false); }}

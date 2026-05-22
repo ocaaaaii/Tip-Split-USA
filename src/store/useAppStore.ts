@@ -6,10 +6,13 @@ import { DEFAULT_TAX_RATE } from '@/data/taxRates';
 import type { Lang } from '@/lib/i18n';
 
 export type Scenario = 'restaurant' | 'takeout' | 'bar' | 'taxi' | 'hotel' | 'salon' | 'delivery';
+export type Theme = 'system' | 'light' | 'dark';
 
 export interface AppState {
   lang: Lang;
   setLang: (l: Lang) => void;
+  theme: Theme;
+  setTheme: (t: Theme) => void;
   locationName: string;
   taxRate: number;
   isOffline: boolean;
@@ -59,6 +62,15 @@ function round2(n: number): number {
 export const useAppStore = create<AppState>((set, get) => ({
   lang: 'zh' as Lang,
   setLang: (l) => set({ lang: l }),
+  theme: (typeof window !== 'undefined' ? (localStorage.getItem('tipsplit_theme') as Theme | null) : null) ?? 'system',
+  setTheme: (t) => {
+    if (typeof window !== 'undefined') localStorage.setItem('tipsplit_theme', t);
+    const html = document.documentElement;
+    if (t === 'dark')  { html.setAttribute('data-theme', 'dark'); }
+    else if (t === 'light') { html.setAttribute('data-theme', 'light'); }
+    else               { html.removeAttribute('data-theme'); }
+    set({ theme: t });
+  },
   locationName: 'Detecting location...',
   taxRate: DEFAULT_TAX_RATE,
   isOffline: false,
@@ -109,18 +121,12 @@ export const useAppStore = create<AppState>((set, get) => ({
     receiptItems: state.receiptItems.filter((item) => item.id !== id),
   })),
   computeAmounts: () => {
-    const { billAmount, isTaxInclusive, taxRate, tipPercent } = get();
-    const raw = parseFloat(billAmount) || 0;
-    let subtotal: number;
-    let taxAmount: number;
-    if (isTaxInclusive) {
-      subtotal = round2(raw / (1 + taxRate / 100));
-      taxAmount = round2(raw - subtotal);
-    } else {
-      subtotal = raw;
-      taxAmount = round2(raw * (taxRate / 100));
-    }
-    const tipAmount = round2(subtotal * (tipPercent / 100));
+    const state = get();
+    const raw = parseFloat(state.billAmount) || 0;
+    let subtotal = state.isTaxInclusive ? raw / (1 + state.taxRate / 100) : raw;
+    subtotal = Math.round(subtotal * 100) / 100;
+    const taxAmount = Math.round(subtotal * state.taxRate) / 100;
+    const tipAmount = Math.round(subtotal * state.tipPercent) / 100;
     const totalAmount = round2(subtotal + taxAmount + tipAmount);
     set({ subtotal, taxAmount, tipAmount, totalAmount });
   },

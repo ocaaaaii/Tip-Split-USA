@@ -14,9 +14,22 @@
   --accent-orange:#C4581A;
 }
 
-/* ── Dark mode: Maillard 焦糖深色版 ── */
+/* ── Dark mode vars (shared by media query + manual .dark class) ── */
+.dark-vars {
+  --cream-bg:     #1C1209;
+  --cream-card:   #261A0E;
+  --cream-border: #3D2A14;
+  --mocha-dark:   #F2E4C4;
+  --mocha-mid:    #C8A87A;
+  --mocha-light:  #8A6A48;
+  --accent-warm:  #7EAAC4;
+  --accent-sage:  #8FBE93;
+  --accent-orange:#E07040;
+}
+
+/* ── Auto dark: follow system ── */
 @media (prefers-color-scheme: dark) {
-  :root {
+  html:not([data-theme='light']) {
     --cream-bg:     #1C1209;
     --cream-card:   #261A0E;
     --cream-border: #3D2A14;
@@ -27,23 +40,35 @@
     --accent-sage:  #8FBE93;
     --accent-orange:#E07040;
   }
-  html { background-color: var(--cream-bg); }
-  body { background-color: var(--cream-bg); color: var(--mocha-dark); }
-  .card {
-    background: var(--cream-card);
-    border-color: var(--cream-border);
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
-  }
-  /* Desktop dot pattern in dark mode */
+}
+
+/* ── Manual dark: data-theme="dark" ── */
+html[data-theme='dark'] {
+  --cream-bg:     #1C1209;
+  --cream-card:   #261A0E;
+  --cream-border: #3D2A14;
+  --mocha-dark:   #F2E4C4;
+  --mocha-mid:    #C8A87A;
+  --mocha-light:  #8A6A48;
+  --accent-warm:  #7EAAC4;
+  --accent-sage:  #8FBE93;
+  --accent-orange:#E07040;
+}
+
+/* Dark styles applied whenever dark vars are active */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) body { background-color: var(--cream-bg); color: var(--mocha-dark); }
+  html:not([data-theme='light']) .card { background: var(--cream-card); border-color: var(--cream-border); box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+  html:not([data-theme='light']) .skeleton { background: linear-gradient(90deg,#2A1A0A 25%,#3A260E 50%,#2A1A0A 75%); }
   @media (min-width: 768px) {
-    body {
-      background-image: radial-gradient(circle, #3D2A14 1px, transparent 1px);
-    }
+    html:not([data-theme='light']) body { background-image: radial-gradient(circle, #3D2A14 1px, transparent 1px); }
   }
-  /* Skeleton shimmer dark */
-  .skeleton {
-    background: linear-gradient(90deg, #2A1A0A 25%, #3A260E 50%, #2A1A0A 75%);
-  }
+}
+html[data-theme='dark'] body { background-color: var(--cream-bg); color: var(--mocha-dark); }
+html[data-theme='dark'] .card { background: var(--cream-card); border-color: var(--cream-border); box-shadow: 0 2px 12px rgba(0,0,0,0.4); }
+html[data-theme='dark'] .skeleton { background: linear-gradient(90deg,#2A1A0A 25%,#3A260E 50%,#2A1A0A 75%); }
+@media (min-width: 768px) {
+  html[data-theme='dark'] body { background-image: radial-gradient(circle, #3D2A14 1px, transparent 1px); }
 }
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
