@@ -1,9 +1,10 @@
 // Currency conversion utilities
 // Tries to fetch live rates; falls back to hardcoded defaults
 
-export type CurrencyCode = 'USD' | 'TWD' | 'CNY' | 'JPY' | 'EUR' | 'HKD' | 'KRW' | 'BRL' | 'MXN' | 'SGD';
+export type CurrencyCode = 'NONE' | 'USD' | 'TWD' | 'CNY' | 'JPY' | 'EUR' | 'HKD' | 'KRW' | 'BRL' | 'MXN' | 'SGD';
 
 export const CURRENCY_LABELS: Record<CurrencyCode, { label: string; symbol: string; flag: string }> = {
+  NONE: { label: 'No conversion', symbol: '—',  flag: '✕'  },
   USD: { label: 'US Dollar',        symbol: '$',    flag: '\u{1F1FA}\u{1F1F8}' },
   TWD: { label: '台幣',     symbol: 'NT$',  flag: '\u{1F1F9}\u{1F1FC}' },
   CNY: { label: '人民幣', symbol: '¥', flag: '\u{1F1E8}\u{1F1F3}' },
@@ -17,6 +18,7 @@ export const CURRENCY_LABELS: Record<CurrencyCode, { label: string; symbol: stri
 };
 
 export const FALLBACK_RATES: Record<CurrencyCode, number> = {
+  NONE: 1.0,
   USD: 1.0,
   TWD: 32.0,
   CNY: 7.25,
@@ -56,6 +58,7 @@ export async function fetchExchangeRates(): Promise<RateResult> {
 
     const r = data.rates;
     const rates: Record<CurrencyCode, number> = {
+      NONE: 1.0,
       USD: 1.0,
       TWD: r.TWD ?? FALLBACK_RATES.TWD,
       CNY: r.CNY ?? FALLBACK_RATES.CNY,

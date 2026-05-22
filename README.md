@@ -1,117 +1,189 @@
-# TipSplit USA
+# TipSplit USA 🧾
 
-> 美國小費與分帳萬能助手 — Smart tip calculator & bill splitter for dining in the US
+> Smart tip calculator & fair bill splitter for dining in the United States
+> 美國小費計算 × 公平分帳一站搞定
 
----
-
-## 快速啟動（本機開發）
-
-```bash
-cd "TipSplit USA"
-npm install
-npm run dev
-```
-
-打開瀏覽器訪問 **http://localhost:3000**，用手機掃描 QR Code 或輸入本機 IP 即可行動測試。
+**Live app →** [tipsplit-usa.vercel.app](https://tipsplit-usa.vercel.app)
 
 ---
 
-## 部署到網路（推薦：Vercel）
+## ✨ What It Does
 
-### 為什麼選 Vercel？
-- Next.js 官方親爸爸，零設定即部署
-- 免費方案足夠個人/小組使用
-- 自動 HTTPS、全球 CDN、自動 CI/CD（推 GitHub 自動重新部署）
-- 部署完立刻獲得 `xxx.vercel.app` 公開網址，手機直接可用
+TipSplit USA takes the math and awkwardness out of splitting the check. Enter your bill, pick a tip, and it instantly shows everyone's share — taxes, tips, and all — down to the cent.
 
-### 步驟 1 — 上傳 GitHub
+---
 
-1. 到 [github.com](https://github.com) 建立新 repository（例如：`tipsplit-usa`）
-2. 在 `TipSplit USA` 資料夾裡執行：
+## 🚀 Quick Start
 
-```bash
-git init
-git add .
-git commit -m "Initial commit"
-git branch -M main
-git remote add origin https://github.com/你的帳號/tipsplit-usa.git
-git push -u origin main
+1. Open the app and **enter your bill amount** on the number pad
+2. Toggle **"Pre-tax"** if your receipt already includes tax
+3. Pick a **tip percentage** (or enter a custom amount)
+4. Choose a **dining scenario** to get context-aware suggestions
+5. Head to **Split** to divide the bill
+
+---
+
+## 📱 Feature Guide
+
+### 🧮 Calculator (Home Screen)
+
+| Feature | How to use |
+|---|---|
+| **Number pad** | Tap digits to enter bill amount |
+| **Pre-tax toggle** | Enable if the amount on your receipt already includes tax — app back-calculates the pre-tax base |
+| **Tip buttons** | Quick-select 15 / 18 / 20 / 25 % or tap **Custom** to type any amount |
+| **Scenario selector** | Swipe through 7 scenarios (Restaurant / Takeout / Bar / Taxi / Hotel / Salon / Delivery) — each has context tips |
+| **Live breakdown** | Subtotal · Tax · Tip · Total updates in real time as you type |
+
+---
+
+### 🌐 Location & Tax Rate
+
+The app auto-detects your location via browser geolocation and looks up the local tax rate for your state (and city where applicable).
+
+- **Online**: pulls live tax data for 50 states + major cities
+- **Offline / Location denied**: falls back to a built-in tax library — just tap the tax badge to set it manually
+
+---
+
+### 👥 Split — Even Split
+
+Go to **Split → Even Split**:
+
+1. Use **＋ / −** to set the number of people
+2. The app shows each person's share including their proportional tax and tip
+3. The first person absorbs any 1-cent rounding remainder automatically
+4. Tap **Summary** to share the result
+
+---
+
+### 🧾 Split — Itemized
+
+Go to **Split → Itemized** when people ordered different things:
+
+1. **Add participants** — each gets a color dot
+2. **Add items** — enter item name and price, then assign it to one or more people
+3. Mark items as 🍷 **Alcohol** to exclude non-drinkers from that cost
+4. Tax and tip are distributed **proportionally** based on each person's food total
+5. 1-cent rounding is handled automatically
+
+> **Math:** `Person's tax = Total tax × (Person's subtotal ÷ Bill subtotal)`
+
+---
+
+### 📋 Summary & Sharing
+
+The Summary page shows each person's final amount with:
+
+- Individual QR codes — tablemates scan to see exactly what they owe
+- **Copy** button for each person's breakdown
+- **Share** button to send the full split via iMessage, WhatsApp, or any app
+- Bill auto-saves to history (last 20 bills stored locally)
+
+---
+
+### 💱 Currency Conversion
+
+Tap the **currency button** (top right) to see amounts in:
+
+| Currency | |
+|---|---|
+| TWD 🇹🇼 | NT$ |
+| KRW 🇰🇷 | ₩ |
+| JPY 🇯🇵 | ¥ |
+| CNY 🇨🇳 | ¥ |
+| HKD 🇭🇰 | HK$ |
+| BRL 🇧🇷 | R$ |
+| MXN 🇲🇽 | MX$ |
+| SGD 🇸🇬 | S$ |
+| EUR 🇪🇺 | € |
+| **✕ No conversion** | USD only |
+
+- 🟢 **Live rates**: fetched from open.er-api.com (refreshed hourly)
+- 🟡 **Est. Rate**: offline fallback — rates are approximate
+
+---
+
+### 🌍 Language
+
+Tap the language button to switch between:
+
+**English · 繁體中文 · 简体中文 · 日本語 · 한국어 · Español · Português**
+
+All UI text, tip culture cards, and alerts switch instantly.
+
+---
+
+### 🌙 Dark Mode
+
+Tap the **💻 / 🌙 / ☀️** button to cycle through:
+
+- **💻 Auto** — follows your device system setting
+- **🌙 Dark** — Maillard dark theme (warm espresso tones)
+- **☀️ Light** — Morandi cream palette
+
+---
+
+### 📊 Stats Dashboard
+
+The **Stats** tab tracks your tipping history:
+
+- Total spent, average tip %, number of bills
+- Breakdown by scenario (Restaurant / Bar / Hotel…)
+- Recent bill log with dates and amounts
+
+---
+
+### 📚 Tip Culture Cards
+
+Tap the **🎓** button on the home screen to open scenario-specific tipping guides:
+
+- Expected tip ranges by meal type (lunch vs. dinner) and venue tier
+- When auto-gratuity applies (usually 6+ people, can reach 25–30%)
+- Cash vs. card: cash tips go directly to your server; card tips may enter a tip pool
+- Post-COVID tip fatigue: pressing 0% or Skip on takeout iPads is perfectly fine
+- State minimum wage context (e.g. CA at $18–20/hr still expects tips)
+
+---
+
+### ⚠️ Smart Alerts
+
+| Alert | Trigger |
+|---|---|
+| **Auto-Gratuity** | 6+ people — service charge may already be included |
+| **Tip-screen pressure** | Takeout / fast food — reminder that tipping is optional |
+| **Service charge detected** | Keywords like "service charge" or "gratuity" found in receipt |
+
+---
+
+## 🔢 The Math
+
 ```
+Pre-tax base    = Inclusive amount ÷ (1 + tax rate)
+Tax amount      = Pre-tax base × tax rate
+Tip amount      = Pre-tax base × tip %
+Total           = Pre-tax base + tax + tip
 
-> 如果沒裝 Git，先到 https://git-scm.com 下載安裝。
-
-### 步驟 2 — Vercel 一鍵部署
-
-1. 去 [vercel.com](https://vercel.com) 用 GitHub 帳號登入（免費）
-2. 點 **"Add New Project"**
-3. 選擇剛剛的 `tipsplit-usa` repo → 點 **Import**
-4. Framework 自動偵測為 **Next.js** ✓
-5. 點 **Deploy** — 約 1 分鐘後完成！
-
-部署完成後你會得到：
-```
-https://tipsplit-usa.vercel.app
-```
-
-手機直接輸入這個網址，或掃描 Vercel 提供的 QR Code 即可使用。
-
-### 步驟 3 — 之後更新（自動）
-
-只要推新 commit 到 GitHub，Vercel 自動重新部署：
-
-```bash
-git add .
-git commit -m "更新功能"
-git push
+── Itemized split ──
+Person's tax    = Total tax  × (Person's items ÷ Bill subtotal)
+Person's tip    = Total tip  × (Person's items ÷ Bill subtotal)
+Person's total  = Person's items + Person's tax + Person's tip
+1¢ remainder   → absorbed by the first person
 ```
 
 ---
 
-## 其他部署選項比較
+## 🛠 Tech Stack
 
-| 方案 | 費用 | 難度 | 適合 |
-|------|------|------|------|
-| **Vercel（推薦）** | 免費 | ⭐ 超簡單 | 個人/小組 |
-| Netlify | 免費 | ⭐ 簡單 | 靜態站（需額外設定 Next.js） |
-| Railway | 有免費額度 | ⭐⭐ 中等 | 全端 App |
-| 自架 VPS | 月費 $5+ | ⭐⭐⭐ 難 | 進階用戶 |
+| | |
+|---|---|
+| Framework | Next.js 14 (App Router) |
+| Styling | Tailwind CSS |
+| State | Zustand |
+| Exchange rates | open.er-api.com (with offline fallback) |
+| i18n | Custom lightweight system (7 languages) |
+| PWA | Service Worker + Web App Manifest |
 
 ---
 
-## 功能總覽
-
-| 功能 | 說明 |
-|------|------|
-| 🌐 GPS 定位 | 自動偵測位置，帶入當地稅率 |
-| 📍 離線稅率 | 無網路自動降級至內建庫（20州 + 主要城市） |
-| 🧮 稅前/稅後切換 | 推薦稅前計算，幫你省錢 |
-| 🍽️ 7 種場景 | 餐廳/外帶/酒吧/計程車/飯店/美髮/外送 |
-| 🚨 Auto-Gratuity 警示 | 6 人以上自動提醒 |
-| 💡 反勒索國防 | 外帶/快餐提示可按 Skip |
-| 👥 均分 + 品項拆帳 | 兩種分帳模式，1 分錢誤差自動處理 |
-| 📷 Tesseract OCR | 前端離線掃描收據，不上傳任何資料 |
-| ⚖️ 比例分攤演算法 | 稅金與小費按個人消費比例公平分攤 |
-| 💱 6 種外幣 | TWD/CNY/JPY/EUR/HKD，即時匯率 |
-| 🌍 中英切換 | 頂部一鍵切換全介面語言 |
-| 📱 RWD 響應式 | 手機/平板/桌機全適配，桌機顯示居中卡片 |
-| 📤 一鍵分享 | iMessage / Venmo / 複製文字 |
-
-## 核心數學公式
-
-```
-個人稅金 = 總稅金 × (個人餐費 / 帳單稅前小計)
-個人小費 = 總小費 × (個人餐費 / 帳單稅前小計)
-個人總額 = 個人餐費 + 個人稅金 + 個人小費
-
-1 分錢誤差 → 自動歸入第一位付款人
-含稅金額逆推 → 稅前 = 含稅總額 / (1 + 稅率%)
-```
-
-## 技術架構
-
-- **Framework**: Next.js 14 (App Router)
-- **樣式**: Tailwind CSS (Morandi Cream Palette)
-- **狀態管理**: Zustand
-- **OCR**: Tesseract.js (前端離線)
-- **匯率 API**: open.er-api.com（免費，有離線 fallback）
-- **i18n**: 自製輕量雙語系統（zh-TW / en）
+*developed by CA & SC*

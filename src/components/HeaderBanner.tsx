@@ -6,9 +6,9 @@ export default function HeaderBanner() {
   const { lang } = useAppStore();
 
   return (
-    <div style={{ background: 'var(--cream-card)', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ background: 'var(--header-bg)', position: 'relative', overflow: 'hidden' }}>
       {/* gradient accent line at top */}
-      <div style={{ height: '3px', background: 'linear-gradient(90deg, var(--cream-bg), #D4B880 40%, #688DA5 70%, var(--cream-bg))' }} />
+      <div style={{ height: '3px', background: 'linear-gradient(90deg, var(--header-bg), #D4B880 40%, #688DA5 70%, var(--header-bg))' }} />
 
       <div style={{ padding: '18px 24px 16px' }}>
         <h1 style={{
@@ -18,7 +18,7 @@ export default function HeaderBanner() {
           fontSize: '28px',
           fontWeight: '700',
           letterSpacing: '0.02em',
-          color: 'var(--mocha-dark)',
+          color: 'var(--header-text)',
           lineHeight: 1.1,
         }}>
           TipSplit{' '}
@@ -26,14 +26,14 @@ export default function HeaderBanner() {
         </h1>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px' }}>
-          <div style={{ flex: 1, height: '0.5px', background: 'var(--cream-border)', opacity: 0.5 }} />
+          <div style={{ flex: 1, height: '0.5px', background: 'rgba(212,184,128,0.35)' }} />
           <span style={{
             fontSize: '9px', letterSpacing: '0.14em',
-            color: 'var(--mocha-light)', textTransform: 'uppercase',
+            color: 'rgba(212,184,128,0.65)', textTransform: 'uppercase',
           }}>
             {lang === 'zh' || lang === 'sc' ? '智慧小費 · 公平分帳' : 'Smart Tip · Fair Split'}
           </span>
-          <div style={{ flex: 1, height: '0.5px', background: 'var(--cream-border)', opacity: 0.5 }} />
+          <div style={{ flex: 1, height: '0.5px', background: 'rgba(212,184,128,0.35)' }} />
         </div>
       </div>
     </div>

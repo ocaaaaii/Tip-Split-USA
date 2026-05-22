@@ -7,12 +7,12 @@ import { getTaxByZip } from '@/data/taxRates';
 import { t, translations, type Lang } from '@/lib/i18n';
 import clsx from 'clsx';
 
-const CURRENCIES: CurrencyCode[] = ['TWD', 'KRW', 'JPY', 'CNY', 'HKD', 'BRL', 'MXN', 'SGD', 'EUR'];
+const CURRENCIES: CurrencyCode[] = ['NONE', 'TWD', 'KRW', 'JPY', 'CNY', 'HKD', 'BRL', 'MXN', 'SGD', 'EUR'];
 
 const LANGUAGES: { code: Lang; label: string; short: string }[] = [
+  { code: 'en', label: 'English',  short: 'EN'   },
   { code: 'zh', label: '繁體中文', short: '中文' },
   { code: 'sc', label: '简体中文', short: '简中' },
-  { code: 'en', label: 'English',  short: 'EN'   },
   { code: 'ja', label: '日本語',   short: '日本語' },
   { code: 'ko', label: '한국어',   short: '한국어' },
   { code: 'es', label: 'Español',  short: 'ES'   },
@@ -162,8 +162,14 @@ export default function TopBar() {
             onClick={() => { setShowCurrencyPicker(!showCurrencyPicker); setShowLangPicker(false); }}
             className="flex items-center gap-1 px-2 py-1 rounded-lg bg-accent-warm text-white text-xs font-bold"
           >
-            <span>{currInfo.flag}</span>
-            <span>{displayCurrency}</span>
+            {displayCurrency === 'NONE' ? (
+              <span className="tracking-widest opacity-80">—</span>
+            ) : (
+              <>
+                <span>{currInfo.flag}</span>
+                <span>{displayCurrency}</span>
+              </>
+            )}
             <span className="text-white/70 text-[9px]">{showCurrencyPicker ? '▲' : '▼'}</span>
           </button>
 
@@ -188,18 +194,29 @@ export default function TopBar() {
                 )}
                 {CURRENCIES.map((cur) => {
                   const info = CURRENCY_LABELS[cur];
+                  const isNone = cur === 'NONE';
                   return (
                     <button
                       key={cur}
                       onClick={() => { setDisplayCurrency(cur); setShowCurrencyPicker(false); }}
                       className={clsx(
                         'flex items-center gap-2 px-3 py-2.5 w-full text-left text-sm hover:bg-cream-deep transition-colors',
-                        cur === displayCurrency ? 'text-accent-warm font-bold' : 'text-mocha-dark'
+                        cur === displayCurrency ? 'text-accent-warm font-bold' : 'text-mocha-dark',
+                        isNone && 'border-b border-cream-border'
                       )}
                     >
-                      <span>{info.flag}</span>
-                      <span className="font-medium">{info.symbol}</span>
-                      <span className="text-mocha-mid text-xs">{cur}</span>
+                      {isNone ? (
+                        <>
+                          <span className="text-mocha-light text-base">✕</span>
+                          <span className="font-medium">No conversion</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>{info.flag}</span>
+                          <span className="font-medium">{info.symbol}</span>
+                          <span className="text-mocha-mid text-xs">{cur}</span>
+                        </>
+                      )}
                       {cur === displayCurrency && <span className="ml-auto text-accent-warm text-xs">✓</span>}
                     </button>
                   );

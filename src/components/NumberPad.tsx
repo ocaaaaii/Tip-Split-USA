@@ -52,15 +52,15 @@ export default function NumberPad() {
               background: isDelete
                 ? 'linear-gradient(145deg, #C8A870, #D4B880)'
                 : isDot
-                ? '#EDE0C0'
-                : '#F7EED8',
-              border: `1px solid ${isDelete ? '#B89A60' : '#D4B880'}`,
+                ? 'var(--numkey-dot)'
+                : 'var(--numkey-bg)',
+              border: `1px solid ${isDelete ? '#B89A60' : 'var(--numkey-border)'}`,
               boxShadow: isDelete
                 ? '0 3px 8px rgba(61,29,10,0.18), inset 0 1px 0 rgba(255,255,255,0.15)'
-                : '0 2px 6px rgba(61,29,10,0.08), inset 0 1px 0 rgba(255,255,255,0.6)',
+                : '0 2px 6px rgba(61,29,10,0.08), inset 0 1px 0 rgba(255,255,255,0.06)',
               fontSize: isDelete ? '18px' : '22px',
               fontWeight: isDelete ? '600' : '500',
-              color: isDelete ? '#F7EED8' : '#3D1D0A',
+              color: isDelete ? '#F7EED8' : 'var(--numkey-text)',
               letterSpacing: '-0.02em',
             }}
           >

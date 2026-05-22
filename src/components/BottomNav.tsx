@@ -70,7 +70,7 @@ export default function BottomNav() {
           marginTop: '4px',
           pointerEvents: 'none',
         }}>
-          developed by CA, SC
+          developed by CA & SC
         </p>
       </div>
     </nav>

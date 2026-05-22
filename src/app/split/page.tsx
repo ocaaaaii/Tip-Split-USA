@@ -22,6 +22,7 @@ export default function SplitPage() {
   const s = translations.split;
   const fmtUSD = (n: number) => `$${n.toFixed(2)}`;
   const fmtForeign = (n: number) => formatCurrency(convertFromUSD(n, displayCurrency, exchangeRates), displayCurrency);
+  const showForeign = displayCurrency !== 'NONE';
   const evenSplit = calculateEvenSplit(subtotal, taxAmount, tipAmount, guestCount);
   const foreignInfo = CURRENCY_LABELS[displayCurrency];
 
@@ -46,9 +47,11 @@ export default function SplitPage() {
             <div>
               <p className="text-xs text-mocha-light mb-0.5">{t(s.billTotal, lang)}</p>
               <p className="text-3xl font-bold text-mocha-dark">{fmtUSD(totalAmount)}</p>
-              <p className="text-sm text-accent-warm font-medium">
-                ≈ {fmtForeign(totalAmount)} {foreignInfo.flag}
-              </p>
+              {showForeign && (
+                <p className="text-sm text-accent-warm font-medium">
+                  ≈ {fmtForeign(totalAmount)} {foreignInfo.flag}
+                </p>
+              )}
             </div>
             <div className="text-right text-sm text-mocha-mid space-y-0.5">
               <p>{t(s.preTax, lang)} {fmtUSD(subtotal)}</p>
@@ -122,7 +125,7 @@ export default function SplitPage() {
             >
               <p className="text-white/80 text-sm mb-1">{t(s.perPerson, lang)}</p>
               <p className="text-4xl font-bold text-white">{fmtUSD(evenSplit.perPerson)}</p>
-              <p className="text-white/80 text-sm mt-1">≈ {fmtForeign(evenSplit.perPerson)}</p>
+              {showForeign && <p className="text-white/80 text-sm mt-1">≈ {fmtForeign(evenSplit.perPerson)}</p>}
             </div>
 
             {evenSplit.remainder !== 0 && (
@@ -156,7 +159,7 @@ export default function SplitPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-mocha-dark">{fmtUSD(amount)}</p>
-                    <p className="text-xs text-mocha-light">{fmtForeign(amount)}</p>
+                    {showForeign && <p className="text-xs text-mocha-light">{fmtForeign(amount)}</p>}
                   </div>
                 </div>
               );

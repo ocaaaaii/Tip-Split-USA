@@ -13,15 +13,14 @@ export default function LiveDisplay() {
   } = useAppStore();
 
   const d = translations.display;
-  const fmtUSD    = (n: number) => `$${n.toFixed(2)}`;
+  const fmtUSD     = (n: number) => `$${n.toFixed(2)}`;
   const fmtForeign = (n: number) => {
     const converted = convertFromUSD(n, displayCurrency, exchangeRates);
     return formatCurrency(converted, displayCurrency);
   };
 
-  // ── animate total when it changes ──
-  const [popKey, setPopKey]     = useState(0);
-  const [rowKey, setRowKey]     = useState(0);
+  const [popKey, setPopKey] = useState(0);
+  const [rowKey, setRowKey] = useState(0);
   const prevTotal = useRef(totalAmount);
 
   useEffect(() => {
@@ -32,7 +31,8 @@ export default function LiveDisplay() {
     }
   }, [totalAmount]);
 
-  const perPerson  = guestCount > 1 ? totalAmount / guestCount : null;
+  const perPerson   = guestCount > 1 ? totalAmount / guestCount : null;
+  const showForeign = displayCurrency !== 'NONE';
   const foreignInfo = CURRENCY_LABELS[displayCurrency];
 
   const rows = [
@@ -54,8 +54,8 @@ export default function LiveDisplay() {
     <div
       className="rounded-2xl p-4 card-lift"
       style={{
-        background: '#F7EED8',
-        border: '1px solid #D4B880',
+        background: 'var(--cream-card)',
+        border: '1px solid var(--cream-border)',
         boxShadow: '0 2px 12px rgba(61,29,10,0.08)',
       }}
     >
@@ -72,7 +72,7 @@ export default function LiveDisplay() {
         ))}
       </div>
 
-      <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, #D4B880, transparent)', margin: '10px 0' }} />
+      <div style={{ height: '1px', background: 'linear-gradient(90deg, transparent, var(--cream-border), transparent)', margin: '10px 0' }} />
 
       {/* total */}
       <div className="flex items-end justify-between">
@@ -88,13 +88,15 @@ export default function LiveDisplay() {
           <p
             key={popKey}
             className="text-3xl font-bold leading-none amount-pop"
-            style={{ color: '#3D1D0A' }}
+            style={{ color: 'var(--mocha-dark)' }}
           >
             {fmtUSD(totalAmount)}
           </p>
-          <p className="text-sm font-medium mt-0.5" style={{ color: '#688DA5' }}>
-            approx {fmtForeign(totalAmount)} {foreignInfo.flag}
-          </p>
+          {showForeign && (
+            <p className="text-sm font-medium mt-0.5" style={{ color: 'var(--accent-warm)' }}>
+              approx {fmtForeign(totalAmount)} {foreignInfo.flag}
+            </p>
+          )}
           {perPerson !== null && (
             <p className="text-sm text-mocha-mid mt-1">
               {t(d.perPerson, lang)}{' '}

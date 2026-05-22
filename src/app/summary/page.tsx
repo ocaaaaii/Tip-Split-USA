@@ -56,6 +56,7 @@ export default function SummaryPage() {
   const s = translations.summary;
   const fmtUSD = (n: number) => `$${n.toFixed(2)}`;
   const fmtForeign = (n: number) => formatCurrency(convertFromUSD(n, displayCurrency, exchangeRates), displayCurrency);
+  const showForeign = displayCurrency !== 'NONE';
   const foreignInfo = CURRENCY_LABELS[displayCurrency];
 
   interface SummaryRow {
@@ -173,7 +174,7 @@ export default function SummaryPage() {
             <div>
               <p className="text-white/70 text-xs mb-0.5">{t(s.billTotal, lang)}</p>
               <p className="text-4xl font-bold text-white">{fmtUSD(totalAmount)}</p>
-              <p className="text-white/80 text-sm">≈ {fmtForeign(totalAmount)} {foreignInfo.flag}</p>
+              {showForeign && <p className="text-white/80 text-sm">≈ {fmtForeign(totalAmount)} {foreignInfo.flag}</p>}
             </div>
             <div className="text-right text-white/70 text-sm">
               <p>Subtotal {fmtUSD(subtotal)}</p>
@@ -215,7 +216,7 @@ export default function SummaryPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold text-mocha-dark">{fmtUSD(row.total)}</p>
-                    <p className="text-sm font-medium" style={{ color: row.color }}>≈ {fmtForeign(row.total)}</p>
+                    {showForeign && <p className="text-sm font-medium" style={{ color: row.color }}>≈ {fmtForeign(row.total)}</p>}
                   </div>
                 </div>
 
