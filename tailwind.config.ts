@@ -8,25 +8,25 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // All palette colors reference CSS custom properties so dark mode works correctly.
+        // Maillard Palette — light-mode hardcoded values (dark mode overridden via globals.css)
         cream: {
-          bg:     'var(--cream-bg)',
-          card:   'var(--cream-card)',
-          border: 'var(--cream-border)',
-          deep:   'var(--cream-card)',   // alias — same as card
+          bg:     '#EDE0C0',
+          card:   '#F7EED8',
+          border: '#D4B880',
+          deep:   '#E5D0A0',
         },
         mocha: {
-          dark:  'var(--mocha-dark)',
-          mid:   'var(--mocha-mid)',
-          light: 'var(--mocha-light)',
-          pale:  'var(--cream-border)',  // alias
+          dark:  '#3D1D0A',
+          mid:   '#6B3A20',
+          light: '#A07858',
+          pale:  '#D4B880',
         },
         accent: {
-          warm:      'var(--accent-warm)',
+          warm:      '#688DA5',
           warmHover: '#5A7A92',
-          sage:      'var(--accent-sage)',
+          sage:      '#7A9E7E',
           sky:       '#8BAFC4',
-          orange:    'var(--accent-orange)',
+          orange:    '#C4581A',
           red:       '#8B2020',
         },
       },

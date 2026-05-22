@@ -220,3 +220,44 @@ button { transition: transform 0.12s cubic-bezier(0.34,1.56,0.64,1), background 
 .stagger > *:nth-child(1)  { animation-delay: 0.03s; }
 .stagger > *:nth-child(2)  { animation-delay: 0.07s; }
 .stagger > *:nth-child(3)  { animation-delay: 0.11s; }
+/* ═══════════════════════════════════════════════════════════════════
+   DARK MODE — Tailwind utility class overrides
+   Tailwind hardcodes light-mode hex values in generated CSS.
+   These rules use higher specificity to flip them in dark mode.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── auto dark (system preference, not manually set to light) ── */
+@media (prefers-color-scheme: dark) {
+  html:not([data-theme='light']) .text-mocha-dark  { color: #F2E4C4; }
+  html:not([data-theme='light']) .text-mocha-mid   { color: #C8A07A; }
+  html:not([data-theme='light']) .text-mocha-light { color: #A08060; }
+  html:not([data-theme='light']) .text-mocha-pale  { color: #7A5A3A; }
+  html:not([data-theme='light']) .text-accent-warm   { color: #7EAAC4; }
+  html:not([data-theme='light']) .text-accent-orange { color: #E07040; }
+  html:not([data-theme='light']) .text-accent-sage   { color: #8FBE93; }
+  html:not([data-theme='light']) .bg-cream-bg     { background-color: #140D05; }
+  html:not([data-theme='light']) .bg-cream-card   { background-color: #3D2810; }
+  html:not([data-theme='light']) .bg-cream-border { background-color: #5A3C1A; }
+  html:not([data-theme='light']) .bg-cream-deep   { background-color: #2A1A0A; }
+  html:not([data-theme='light']) .border-cream-border { border-color: #5A3C1A; }
+  html:not([data-theme='light']) .border-cream-card   { border-color: #5A3C1A; }
+  html:not([data-theme='light']) .bg-accent-warm  { background-color: #7EAAC4; }
+  html:not([data-theme='light']) .bg-accent-sage  { background-color: #8FBE93; }
+}
+
+/* ── manual dark (data-theme="dark") ── */
+html[data-theme='dark'] .text-mocha-dark  { color: #F2E4C4; }
+html[data-theme='dark'] .text-mocha-mid   { color: #C8A07A; }
+html[data-theme='dark'] .text-mocha-light { color: #A08060; }
+html[data-theme='dark'] .text-mocha-pale  { color: #7A5A3A; }
+html[data-theme='dark'] .text-accent-warm   { color: #7EAAC4; }
+html[data-theme='dark'] .text-accent-orange { color: #E07040; }
+html[data-theme='dark'] .text-accent-sage   { color: #8FBE93; }
+html[data-theme='dark'] .bg-cream-bg     { background-color: #140D05; }
+html[data-theme='dark'] .bg-cream-card   { background-color: #3D2810; }
+html[data-theme='dark'] .bg-cream-border { background-color: #5A3C1A; }
+html[data-theme='dark'] .bg-cream-deep   { background-color: #2A1A0A; }
+html[data-theme='dark'] .border-cream-border { border-color: #5A3C1A; }
+html[data-theme='dark'] .border-cream-card   { border-color: #5A3C1A; }
+html[data-theme='dark'] .bg-accent-warm  { background-color: #7EAAC4; }
+html[data-theme='dark'] .bg-accent-sage  { background-color: #8FBE93; }
