@@ -81,7 +81,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   customTipMode: false,
   scenario: 'restaurant',
   guestCount: 2,
-  displayCurrency: 'TWD',
+  displayCurrency: 'NONE',
   exchangeRates: FALLBACK_RATES,
   subtotal: 0,
   taxAmount: 0,
