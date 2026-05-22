@@ -8,6 +8,7 @@ interface Props { onDone: () => void; }
 
 const LANGUAGES: { code: Lang; label: string; flag: string }[] = [
   { code: 'zh', label: '繁體中文', flag: '\u{1F1F9}\u{1F1FC}' },
+  { code: 'sc', label: '简体中文', flag: '\u{1F1E8}\u{1F1F3}' },
   { code: 'en', label: 'English',     flag: '\u{1F1FA}\u{1F1F8}' },
   { code: 'ja', label: '日本語',   flag: '\u{1F1EF}\u{1F1F5}' },
   { code: 'ko', label: '한국어',   flag: '\u{1F1F0}\u{1F1F7}' },
@@ -183,6 +184,38 @@ const SLIDES: Record<Lang, SlideContent[]> = {
       hint: 'Toca \u{1F4CB} Historial en el resumen',
     },
   ],
+  sc: [
+    {
+      icon: '\u{1F9EE}',
+      title: '欢迎使用 TipSplit USA',
+      body: '第一名的小费计算 App，专为在美国消费的你设计。先选择你的语言！',
+      hint: '上方选择语言',
+    },
+    {
+      icon: '\u{1F4B5}',
+      title: '输入账单金额',
+      body: '点击数字键盘输入金额。支持「税前金额」与「税内金额」切换，自动算出小费。',
+      hint: '右上角切换开关',
+    },
+    {
+      icon: '\u{1F37D}\uFE0F',
+      title: '选择消费场景',
+      body: '餐厅、外带、酒吧、出租车…每个场景自动推荐最佳小费比率。点 ⓘ 看小费文化教学卡。',
+      hint: '支持 7 个常见场景',
+    },
+    {
+      icon: '\u{1F9FE}',
+      title: '灵活分账',
+      body: '「平均分摊」一键搞定；「品项拆账」可指定谁吃什么。含酒水对不喝酒者自动排除。',
+      hint: '震动反馈 + 详细收据',
+    },
+    {
+      icon: '\u{1F4CB}',
+      title: '历史记录 & 旅游模式',
+      body: '每笔账单自动保存，最近 20 笔随时查阅。建立旅行群组，统计整趟小费支出。',
+      hint: '结账页点右上角「历史」',
+    },
+  ],
   pt: [
     {
       icon: '\u{1F9EE}',
@@ -219,6 +252,7 @@ const SLIDES: Record<Lang, SlideContent[]> = {
 
 const START_BTN: Record<Lang, string> = {
   zh: '開始使用 →',
+  sc: '开始使用 →',
   en: 'Get Started →',
   ja: '始める →',
   ko: '시작하기 →',
@@ -227,10 +261,10 @@ const START_BTN: Record<Lang, string> = {
 };
 
 const NEXT_BTN: Record<Lang, string> = {
-  zh: '下一步', en: 'Next', ja: '次へ', ko: '다음', es: 'Siguiente', pt: 'Próximo',
+  zh: '下一步', sc: '下一步', en: 'Next', ja: '次へ', ko: '다음', es: 'Siguiente', pt: 'Próximo',
 };
 const SKIP_BTN: Record<Lang, string> = {
-  zh: '跳過', en: 'Skip', ja: 'スキップ', ko: '건너뛰기', es: 'Omitir', pt: 'Pular',
+  zh: '跳過', sc: '跳过', en: 'Skip', ja: 'スキップ', ko: '건너뛰기', es: 'Omitir', pt: 'Pular',
 };
 
 export default function OnboardingModal({ onDone }: Props) {

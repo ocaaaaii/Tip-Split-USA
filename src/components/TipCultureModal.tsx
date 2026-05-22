@@ -22,6 +22,17 @@ const CONTENT: Record<Scenario, { icon: string } & Record<Lang, LangContent>> = 
       ],
       skip: '不適合跳過。',
     },
+    sc: {
+      range: '18 – 22%',
+      rule: '這是美國文化中最強烈的小费場合。服務生的薪水很低（通常只有 $2–5/hr），小费是主要收入来源。',
+      tips: [
+        '6人以上请先看账单底部是否已有 Auto-Gratuity（通常 18%）',
+        '税前計算小费才是正确做法，幫你省錢',
+        '服務差也建議至少给 15%，有問題找經理反映更有效',
+        '如果觉得服務特別好，可以多给到 25%',
+      ],
+      skip: '不適合跳过。',
+    },
     en: {
       range: '18 – 22%',
       rule: 'Restaurant tipping is the strongest US custom. Servers earn $2–5/hr base wage — tips are their main income.',
@@ -81,6 +92,7 @@ const CONTENT: Record<Scenario, { icon: string } & Record<Lang, LangContent>> = 
   takeout: {
     icon: '\u{1F961}',
     zh: { range: '0 – 10%', rule: '外帶或快餐的小費完全是選擇性的。數位螢幕出現小費畫面時，你有權按 0% 或 Skip。', tips: ["連鎖快餐店（McDonald's、Chipotle）：不需要給", '獨立外帶店：常客可給 $1–2', '數位 kiosk 的 Skip 通常在角落', '自取餐完全不需要給'], skip: '可以跳過，不要有罪惡感。' },
+    sc: { range: '0 – 10%', rule: '外帶或快餐的小费完全是选擇性的。數位螢幕出現小费畫面時，你有權按 0% 或 Skip。', tips: ["連鎖快餐店（McDonald's、Chipotle）：不需要给", '獨立外帶店：常客可给 $1–2', '數位 kiosk 的 Skip 通常在角落', '自取餐完全不需要给'], skip: '可以跳过，不要有罪惡感。' },
     en: { range: '0 – 10%', rule: 'Takeout tipping is entirely optional. When a digital screen shows a tip prompt, you are free to press 0% or Skip.', tips: ["Chain fast food (McDonald's, Chipotle): no tip needed", "Independent takeout: $1–2 is friendly if you're a regular", 'The Skip button is usually small — look in the corners', 'If you pick up yourself, no tip expected'], skip: 'Perfectly fine to skip.' },
     ja: { range: '0 – 10%', rule: 'テイクアウトのチップは任意です。デジタル画面で求められても、0%またはSkipで構いません。', tips: ['チェーン店（マクドナルド等）はチップ不要', '個人店は常連なら$1–2が親切', 'Skipボタンは小さく樹行に表示されることが多い', '自分で取りに行く場合は不要'], skip: 'スキップして問題ありません。' },
     ko: { range: '0 – 10%', rule: '테이크아웃 팔은 완전히 선택입니다. 디지털 화면에서 0% 또는 Skip을 눌러도 됩니다.', tips: ['체인 패스트푸드: 팔 불필요', '소규모 식당: 상시 방문한다면 $1–2', 'Skip 버튼은 보통 구석에 작게 되어 있음', '직접 가져가는 경우 팔 불필요'], skip: '스킵해도 괴찮습니다.' },
@@ -90,6 +102,7 @@ const CONTENT: Record<Scenario, { icon: string } & Record<Lang, LangContent>> = 
   bar: {
     icon: '\u{1F379}',
     zh: { range: '$1–2 / 杯，或 Tab 結帳 15–20%', rule: '酒吧有兩種情境：開 Tab（記帳）或單杯付款。邏輯不同，不要搞混。', tips: ['單點現付：問酒 $1，調酒 $2（不需要按百分比）', '開 Tab：離場前一次結清，給 15–20%', '酒吧服務生也依賴小費為生', '多給一點是打好關係的方式'], skip: '不建議跳過，尤其是開 Tab 的情況。' },
+    sc: { range: '$1–2 / 杯，或 Tab 结账 15–20%', rule: '酒吧有兩種情境：开 Tab（記账）或单杯付款。邏輯不同，不要搞混。', tips: ['单点現付：問酒 $1，調酒 $2（不需要按百分比）', '开 Tab：離場前一次结清，给 15–20%', '酒吧服務生也依賴小费為生', '多给一点是打好關係的方式'], skip: '不建議跳过，尤其是开 Tab 的情況。' },
     en: { range: '$1–2 / drink, or 15–20% for tabs', rule: 'Bars have two modes: pay-per-drink or running a tab. The tipping logic differs for each.', tips: ['Pay per drink: $1 for beer, $2 for cocktails (not percentage-based)', 'Running a tab: settle at the end and tip 15–20%', 'Bartenders rely heavily on tips — be generous', 'Building rapport? A little extra goes a long way'], skip: 'Not recommended, especially for tabs.' },
     ja: { range: '$1–2 / 杯、またはタブの 15–20%', rule: 'バーは1杯ずつ支払うか、タブを開いて最後に一括払うかの2モードがあります。', tips: ['1杯ずつ：ビール$1、カクテル$2（パーセンテージ不要）', 'タブの場合：最後に 15–20% を渡す', 'バーテンダーはチップ依存度が高い—悪げさづに', '常連客なら太った您唄も広かれる'], skip: '特にタブの時はスキップ不可。' },
     ko: { range: '$1–2 / 잔, 또는 탭 정산 15–20%', rule: '바는 잌재마다 결제하거나 탭을 열고 마지막에 정산하는 두 가지 방식이 있습니다.', tips: ['잌마다 결제: 맥주 $1, 칵테일 $2', '탭: 마지막에 15–20% 정산', '바텐더도 팔에 의존 — 너그럽게', '어차피 자주 가에요? 조금 더 주면 좋어해요'], skip: '탭의 경우 스킵하지 세요.' },
@@ -99,6 +112,7 @@ const CONTENT: Record<Scenario, { icon: string } & Record<Lang, LangContent>> = 
   taxi: {
     icon: '\u{1F696}',
     zh: { range: '$2 – $5 / 趣（現金最佳）', rule: '傳統計程車和 Rideshare（Uber/Lyft）略有不同。現金小費對司機最有幫助。', tips: ['短程（$10以內）：$2 現金', '長程（機場接送等）：$3–5 或車費的 15%', 'Uber/Lyft：App 內給小費更安全', '司機幫你搞行李：額外多給 $1/件', '車況整潔、准時、服務好：多給一點'], skip: '可以跳過但不禮貌，尤其是長程。' },
+    sc: { range: '$2 – $5 / 趣（現金最佳）', rule: '传統計程車和 Rideshare（Uber/Lyft）略有不同。現金小费對司機最有幫助。', tips: ['短程（$10以內）：$2 現金', '長程（機場接送等）：$3–5 或車费的 15%', 'Uber/Lyft：App 內给小费更安全', '司機幫你搞行李：額外多给 $1/件', '車況整潔、准時、服務好：多给一点'], skip: '可以跳过但不禮貌，尤其是長程。' },
     en: { range: '$2 – $5 / ride (cash preferred)', rule: 'Traditional taxis and rideshare (Uber/Lyft) work slightly differently. Cash tips are most valuable to drivers.', tips: ['Short ride (under $10): $2 cash', 'Long ride (airport, etc.): $3–5 or 15% of fare', 'Uber/Lyft: in-app tip is safer than cash', 'Driver helps with luggage: extra $1 per bag', 'Clean car, punctual, friendly? Tip more'], skip: 'Skipping is impolite for longer rides.' },
     ja: { range: '$2 – $5 / 乗車（現金歓迎）', rule: '従来のタクシーとUber/Lyftは少し異なります。現金チップが最も喜ばれます。', tips: ['短距離（$10未満）：$2現金', '長距離（空港等）：$3–5または運購の15%', 'Uber/Lyft：アプリ内チップが安全', '荷物を手伝ってもらったら+$1/個', 'サービスが良ければ少し多めに'], skip: '長距離の場合はスキップ不可。' },
     ko: { range: '$2 – $5 / 승차 (현금 선호)', rule: '일반 택시와 Uber/Lyft는 약간 다릅니다. 현금 팔이 운전자에게 가장 유용합니다.', tips: ['단거리 ($10 이하): $2 현금', '장거리 (공항 등): $3–5 또는 요금의 15%', 'Uber/Lyft: 앱 내 팔이 안전', '짐 도움 받으면 미당 $1 추가', '서비스 좋으면 더 주세요'], skip: '장거리는 스킵하는 것이 불손합니다.' },
@@ -108,6 +122,7 @@ const CONTENT: Record<Scenario, { icon: string } & Record<Lang, LangContent>> = 
   hotel: {
     icon: '\u{1F6CF}️',
     zh: { range: '$1 – $5 / 天（每天早上留）', rule: '飯店清潔工每天都可能換人，不要把小費留到退房時才給。', tips: ['每天早上在枚頭旁或桌上留 $1–5（標記清潔"Housekeeping"）', '住宿越高級、房間越大，給多一點（$3–5）', '行李員幫你搞行李：$1–2 / 件', '門儛幫你叫車：$1–2', '送餐到房間：確認帳單是否已含服務費'], skip: '清潔工非常辛苦，請盡量每天留。' },
+    sc: { range: '$1 – $5 / 天（每天早上留）', rule: '饭店清潔工每天都可能換人，不要把小费留到退房時才给。', tips: ['每天早上在枚頭旁或桌上留 $1–5（標記清潔"Housekeeping"）', '住宿越高級、房間越大，给多一点（$3–5）', '行李员幫你搞行李：$1–2 / 件', '門儛幫你叫車：$1–2', '送餐到房間：确認账单是否已含服務费'], skip: '清潔工非常辛苦，请盡量每天留。' },
     en: { range: '$1 – $5 / day (leave each morning)', rule: "Hotel housekeeping changes daily — don't save all tips until checkout, as a different person may have cleaned your room each day.", tips: ['Leave $1–5 on the pillow or desk each morning, labeled "Housekeeping"', 'Upscale hotel or large room: $3–5 per night', 'Bellhop for luggage: $1–2 per bag', 'Doorman calling a cab: $1–2', 'Room service: bill often includes a service charge — check before double-tipping'], skip: 'Please leave something — housekeeping works very hard.' },
     ja: { range: '$1 – $5 / 泳（毎朝置いておく）', rule: 'ホテルの清潔財毎日変わる可能性あり。チェックアウト時までまとめて渡さないで。', tips: ['毎朝枱の上またはテーブルに$1–5（「Housekeeping」とメモ）', '高級ホテル・広い部屋: $3–5', 'ベルボーイ: $1–2/個', 'ドアマンに車を呼んでもらった場合: $1–2', 'ルームサービス: 明細書にサービス料が含まれているか確認'], skip: '清潔財の仕事は大変です—少しでも置いてあげて。' },
     ko: { range: '$1 – $5 / 일 (매일 아침 두기)', rule: '호텔 청소부는 매일 바뀌다. 체크아웃 때까지 기다리지 말고 매일 아침 두세요.', tips: ['매일 침개 위나 책상에 $1–5 ("Housekeeping" 메모 함께)', '고급 호텔이나 넓은 방: $3–5', '침소사향: $1–2/개', '도어맨이 택시 불러즐 때: $1–2', '룸 서비스: 계산서에 서비스 차지 포함 여부 확인'], skip: '청소부는 먹고얬요. 조금이라도 두세요.' },
@@ -117,6 +132,7 @@ const CONTENT: Record<Scenario, { icon: string } & Record<Lang, LangContent>> = 
   salon: {
     icon: '\u{1F485}',
     zh: { range: '15 – 20%', rule: '美髪、美甲等個人護理服務，小費慣例和餐廳差不多。重要：小費給提供服務的人，不是老闆。', tips: ['美髪：剪髪 $5–10，燳染 15–20%', '美甲：$3–5 或 20%，美甲師通常薪水很低', '如果老闆親自服務你，可以給也可以不給', '現金直接給服務人員，確保到他們手上'], skip: '不建議跳過，服務人員薪水普遍偏低。' },
+    sc: { range: '15 – 20%', rule: '美髪、美甲等個人護理服務，小费慣例和餐厅差不多。重要：小费给提供服務的人，不是老闆。', tips: ['美髪：剪髪 $5–10，燳染 15–20%', '美甲：$3–5 或 20%，美甲師通常薪水很低', '如果老闆親自服務你，可以给也可以不给', '現金直接给服務人员，确保到他們手上'], skip: '不建議跳过，服務人员薪水普遍偏低。' },
     en: { range: '15 – 20%', rule: 'Personal care services like hair and nail salons follow similar customs to restaurants. Key: tip the person who served you, not the owner.', tips: ['Haircut: $5–10 flat, or 15–20% for color/treatment', 'Nail tech: $3–5 or 20% — wages are often very low', 'If the owner serves you, tipping is optional (they keep profits)', 'Cash directly to your stylist ensures they receive it fully'], skip: 'Not recommended — wages are typically low.' },
     ja: { range: '15 – 20%', rule: '美容院やネイルサロンはレストランに迊い慣例があります。オーナーでなく、担当者に渡しましょう。', tips: ['カット: $5–10、カラー/トリートメント: 15–20%', 'ネイリスト: $3–5または20%（質金が低い）', 'オーナーが担当ならチップは任意', '現金で直接渡すと確実に歌圓に渡る'], skip: '給不のは遷潑。質金が低いです。' },
     ko: { range: '15 – 20%', rule: '미용실과 네일샵은 레스토랑과 비슷한 관행입니다. 오너가 아닌 서비스제공자에게 팔을 주세요.', tips: ['커트: $5–10, 컬러/트리트먼트: 15–20%', '네일: $3–5 또는 20% (임금이 낙음)', '오너가 직접 서비스하면 팔은 선택', '현금으로 직접 주면 확실히 전달됨'], skip: '임금이 낙아서 비추천 스킵.' },
@@ -126,6 +142,7 @@ const CONTENT: Record<Scenario, { icon: string } & Record<Lang, LangContent>> = 
   delivery: {
     icon: '\u{1F4E6}',
     zh: { range: '$3 – $5 最低，惡劣天氣多給', rule: '外送司機的接單决策受小費影響很大。給太少，你的訂單可能在隊列中等很久。', tips: ['最低底線：$3–5，無論訂單多小', '距離遠或訂單大：10–15%', '下雨、大雪等惡劣天氣：$5–10', 'App 通常讓你在收到後修改小費，服務好可以事後多給', '部分 App（DoorDash）會把小費計入保底薪資，不一定全進司機口袋'], skip: '跳過小費可能導致訂單沒人接或送餐超慢。' },
+    sc: { range: '$3 – $5 最低，惡劣天氣多给', rule: '外送司機的接单决策受小费影響很大。给太少，你的訂单可能在隊列中等很久。', tips: ['最低底線：$3–5，無論訂单多小', '距離遠或訂单大：10–15%', '下雨、大雪等惡劣天氣：$5–10', 'App 通常讓你在收到後修改小费，服務好可以事後多给', '部分 App（DoorDash）會把小费計入保底薪資，不一定全進司機口袋'], skip: '跳过小费可能導致訂单沒人接或送餐超慢。' },
     en: { range: '$3 – $5 minimum; tip more in bad weather', rule: 'Delivery drivers decide whether to accept orders partly based on tip. Low tips mean your order may sit unaccepted for a long time.', tips: ['Minimum: $3–5 regardless of order size', 'Long distance or large order: 10–15%', "Rain, snow, extreme weather: $5–10 — they're risking for you", 'Some apps let you adjust tip after delivery — increase for great service', 'Some apps (DoorDash) count tips toward base pay — not always extra income'], skip: 'Skipping may result in no driver accepting or very long waits.' },
     ja: { range: '$3 – $5最低、悪天候は増額を', rule: '配達ドライバーはチップを見て注文を受けるか決めます。少ないと注文が攻E置されることも。', tips: ['最低 $3–5（注文の大小に関わらず）', '長距離・大きな注文: 10–15%', '雨・雪・悪天候: $5–10', 'アプリは配達後にチップ変更できることが多い', 'DoorDash等はチップが保証薪に充当される場合もある'], skip: 'スキップすると注文が攻e置されるかも。' },
     ko: { range: '$3 – $5 최소; 악쿼 날씨는 더', rule: '배달 기사는 팔 금액에 따라 주문 수락 여부를 결정합니다. 팔이 적으면 주문이 방치될 수 있습니다.', tips: ['최소 $3–5 (주문 크기 무관)', '장거리 또는 대량 주문: 10–15%', '비/눈/악쿼 날씨: $5–10', '앛 분은 배달 후 팔 변경 가능', 'DoorDash등은 팔이 기본급에 포함될 수도 있음'], skip: '스킵 시 배달 기사가 없거나 매우 늘어날 수 있음.' },
@@ -136,6 +153,7 @@ const CONTENT: Record<Scenario, { icon: string } & Record<Lang, LangContent>> = 
 
 const HEADER_LABEL: Record<Lang, string> = {
   zh: '小費文化教學',
+  sc: '小费文化教学',
   en: 'Tip Culture Guide',
   ja: 'チップ文化ガイド',
   ko: '팔 문화 가이드',
@@ -143,11 +161,11 @@ const HEADER_LABEL: Record<Lang, string> = {
   pt: 'Guia de Gorjetas',
 };
 const TIPS_LABEL: Record<Lang, string> = {
-  zh: '實用技巧', en: 'Practical Tips', ja: '実用的なヒント',
+  zh: '實用技巧', sc: '实用技巧', en: 'Practical Tips', ja: '実用的なヒント',
   ko: '실용 팁', es: 'Consejos prácticos', pt: 'Dicas práticas',
 };
 const SKIP_LABEL: Record<Lang, string> = {
-  zh: '跳過小費？', en: 'Skipping?', ja: 'スキップする場合？',
+  zh: '跳過小費？', sc: '跳过小费？', en: 'Skipping?', ja: 'スキップする場合？',
   ko: '스킵하려면?', es: '¿Omitir propina?', pt: 'Omitir gorjeta?',
 };
 

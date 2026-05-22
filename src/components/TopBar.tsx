@@ -11,6 +11,7 @@ const CURRENCIES: CurrencyCode[] = ['TWD', 'KRW', 'JPY', 'CNY', 'HKD', 'BRL', 'M
 
 const LANGUAGES: { code: Lang; label: string; short: string }[] = [
   { code: 'zh', label: '繁體中文', short: '中文' },
+  { code: 'sc', label: '简体中文', short: '简中' },
   { code: 'en', label: 'English',  short: 'EN'   },
   { code: 'ja', label: '日本語',   short: '日本語' },
   { code: 'ko', label: '한국어',   short: '한국어' },
