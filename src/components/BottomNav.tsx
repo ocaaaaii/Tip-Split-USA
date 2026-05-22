@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
-import { t, translations } from '@/lib/i18n';
 import clsx from 'clsx';
 
 const HREFS = ['/', '/split', '/summary', '/stats'] as const;
@@ -26,19 +25,18 @@ const NAV_LABELS: Record<Href, Record<string, string>> = {
 export default function BottomNav() {
   const pathname = usePathname();
   const { lang } = useAppStore();
-  const n = translations.nav;
 
   return (
     <nav className="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[540px] z-50 pointer-events-none">
-      <div className="mx-4 mb-4 pointer-events-auto">
+      <div className="mx-4 mb-3 pointer-events-auto">
         <div
           className="flex items-center justify-around rounded-2xl px-2 py-2"
           style={{
-            background: 'rgba(253,250,246,0.94)',
+            background: 'var(--nav-glass)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
-            border: '1px solid #D4B880',
-            boxShadow: '0 4px 24px rgba(61,29,10,0.12)',
+            border: '1px solid var(--nav-border)',
+            boxShadow: '0 4px 24px rgba(61,29,10,0.18)',
           }}
         >
           {HREFS.map((href) => {
@@ -63,6 +61,17 @@ export default function BottomNav() {
             );
           })}
         </div>
+        <p style={{
+          textAlign: 'center',
+          fontSize: '9px',
+          letterSpacing: '0.08em',
+          color: 'var(--mocha-light)',
+          opacity: 0.45,
+          marginTop: '4px',
+          pointerEvents: 'none',
+        }}>
+          developed by CA, SC
+        </p>
       </div>
     </nav>
   );

@@ -60,7 +60,7 @@ function round2(n: number): number {
 }
 
 export const useAppStore = create<AppState>((set, get) => ({
-  lang: 'zh' as Lang,
+  lang: 'en' as Lang,
   setLang: (l) => set({ lang: l }),
   theme: (typeof window !== 'undefined' ? (localStorage.getItem('tipsplit_theme') as Theme | null) : null) ?? 'system',
   setTheme: (t) => {

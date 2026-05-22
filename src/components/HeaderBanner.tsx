@@ -6,12 +6,11 @@ export default function HeaderBanner() {
   const { lang } = useAppStore();
 
   return (
-    <div style={{ background: '#3D1D0A', position: 'relative', overflow: 'hidden' }}>
+    <div style={{ background: 'var(--cream-card)', position: 'relative', overflow: 'hidden' }}>
       {/* gradient accent line at top */}
-      <div style={{ height: '3px', background: 'linear-gradient(90deg, #3D1D0A, #D4B880 40%, #688DA5 70%, #3D1D0A)' }} />
+      <div style={{ height: '3px', background: 'linear-gradient(90deg, var(--cream-bg), #D4B880 40%, #688DA5 70%, var(--cream-bg))' }} />
 
-      <div style={{ padding: '18px 24px 20px' }}>
-        {/* main title */}
+      <div style={{ padding: '18px 24px 16px' }}>
         <h1 style={{
           margin: 0,
           textAlign: 'center',
@@ -19,23 +18,22 @@ export default function HeaderBanner() {
           fontSize: '28px',
           fontWeight: '700',
           letterSpacing: '0.02em',
-          color: '#F7EED8',
+          color: 'var(--mocha-dark)',
           lineHeight: 1.1,
         }}>
           TipSplit{' '}
           <em style={{ color: '#D4B880', fontWeight: '400', fontStyle: 'italic' }}>USA</em>
         </h1>
 
-        {/* bottom rule + tagline */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '12px' }}>
-          <div style={{ flex: 1, height: '0.5px', background: 'rgba(212,184,128,0.35)' }} />
+          <div style={{ flex: 1, height: '0.5px', background: 'var(--cream-border)', opacity: 0.5 }} />
           <span style={{
             fontSize: '9px', letterSpacing: '0.14em',
-            color: 'rgba(212,184,128,0.55)', textTransform: 'uppercase',
+            color: 'var(--mocha-light)', textTransform: 'uppercase',
           }}>
-            {lang === 'zh' ? '智慧小費 · 公平分帳' : 'Smart Tip · Fair Split'}
+            {lang === 'zh' || lang === 'sc' ? '智慧小費 · 公平分帳' : 'Smart Tip · Fair Split'}
           </span>
-          <div style={{ flex: 1, height: '0.5px', background: 'rgba(212,184,128,0.35)' }} />
+          <div style={{ flex: 1, height: '0.5px', background: 'var(--cream-border)', opacity: 0.5 }} />
         </div>
       </div>
     </div>
