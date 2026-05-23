@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import BottomNav from '@/components/BottomNav';
@@ -19,6 +20,9 @@ export default function SplitPage() {
     displayCurrency, exchangeRates,
     lang,
   } = useAppStore();
+
+  // Re-compute on every mount so GPS/tax changes that fired during navigation are reflected
+  useEffect(() => { useAppStore.getState().computeAmounts(); }, []);
 
   const s = translations.split;
   const fmtUSD = (n: number) => `$${n.toFixed(2)}`;

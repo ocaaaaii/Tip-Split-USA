@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAppStore } from '@/store/useAppStore';
 import { fetchExchangeRates, CURRENCY_LABELS, type CurrencyCode } from '@/lib/currency';
-import { getTaxByZip } from '@/data/taxRates';
+import { getTaxByZip, getTaxByGeo } from '@/data/taxRates';
 import { t, translations, type Lang } from '@/lib/i18n';
 import clsx from 'clsx';
 
@@ -60,14 +60,46 @@ export default function TopBar({ onEditTax }: { onEditTax?: () => void }) {
         const { latitude, longitude } = pos.coords;
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&countrycodes=us`,
-            { signal: AbortSignal.timeout(5000) }
+            `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`,
+            { signal: AbortSignal.timeout(5000), headers: { 'Accept-Language': 'en-US,en;q=0.9' } }
           );
           const data = await res.json();
-          const zip = data.address?.postcode?.slice(0, 5) ?? '';
-          const { rate, location } = getTaxByZip(zip);
-          setTaxRate(rate);
-          setLocationName(`${location} (${t(i.tax, lang)}: ${rate}%)`);
+          const addr = data.address ?? {};
+
+          // Non-US location: show a friendly message, use default tax
+          const countryCode = (addr.country_code ?? '').toLowerCase();
+          if (countryCode && countryCode !== 'us') {
+            const cityLabel = addr.city || addr.town || addr.village || addr.county || addr.country || 'Unknown';
+            setLocationName(`📍 ${cityLabel} (non-US — default tax applied)`);
+            setIsOffline(true);
+            return;
+          }
+
+          // US location: try geo match first, then zip fallback
+          const cityName  = addr.city || addr.town || addr.village || addr.hamlet || addr.suburb || '';
+          const county    = addr.county || '';
+          const stateName = addr.state || '';
+          const stateCode = (addr['ISO3166-2-lvl4'] ?? '').replace(/^US-/, '');
+
+          const geoResult = getTaxByGeo({ cityName, county, stateName, stateCode });
+
+          let finalRate     = geoResult.rate;
+          let finalLocation = geoResult.location;
+
+          // If geo only matched at state level, see if zip gives a city-level match
+          if (geoResult.confidence !== 'city') {
+            const zip = (addr.postcode ?? '').slice(0, 5);
+            if (zip) {
+              const zipResult = getTaxByZip(zip);
+              if (zipResult.location !== 'Unknown Location') {
+                finalRate     = zipResult.rate;
+                finalLocation = zipResult.location;
+              }
+            }
+          }
+
+          setTaxRate(finalRate);
+          setLocationName(`${finalLocation} (${t(i.tax, lang)}: ${finalRate}%)`);
           setIsOffline(false);
         } catch {
           setLocationName(t(i.locationOffline, lang));

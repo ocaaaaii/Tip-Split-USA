@@ -28,6 +28,9 @@ export default function SummaryPage() {
   const [showHistory, setShowHistory] = useState(false);
   const savedRef = useRef(false);
 
+  // Re-compute on mount in case GPS/tax changes fired during navigation
+  useEffect(() => { useAppStore.getState().computeAmounts(); }, []);
+
   // Auto-save bill to LocalStorage on first mount
   useEffect(() => {
     if (savedRef.current || totalAmount <= 0) return;
