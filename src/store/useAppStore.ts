@@ -9,7 +9,7 @@ export type Scenario = 'restaurant' | 'takeout' | 'bar' | 'taxi' | 'hotel' | 'sa
 export type Theme = 'system' | 'light' | 'dark';
 
 // ---------------------------------------------------------------------------
-// Helpers
+// Storage helpers
 // ---------------------------------------------------------------------------
 function ss(key: string): string | null {
   if (typeof window === 'undefined') return null;
@@ -17,7 +17,12 @@ function ss(key: string): string | null {
 }
 function ssSet(key: string, value: string): void {
   if (typeof window === 'undefined') return;
-  try { sessionStorage.setItem(key, value); } catch { /* ignore */ }
+  try { sessionStorage.setItem(key, value); } catch { /* quota / private mode */ }
+}
+function ssJSON<T>(key: string, fallback: T): T {
+  const raw = ss(key);
+  if (!raw) return fallback;
+  try { return JSON.parse(raw) as T; } catch { return fallback; }
 }
 function ls(key: string): string | null {
   if (typeof window === 'undefined') return null;
@@ -28,9 +33,7 @@ function lsSet(key: string, value: string): void {
   try { localStorage.setItem(key, value); } catch { /* ignore */ }
 }
 
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
+function round2(n: number): number { return Math.round(n * 100) / 100; }
 
 // ---------------------------------------------------------------------------
 // Types
@@ -83,13 +86,18 @@ export interface AppState {
 }
 
 // ---------------------------------------------------------------------------
-// Initial values read from storage (runs once at module load — client only)
+// Initial values — read once at module load (client only)
 // ---------------------------------------------------------------------------
+const DEFAULT_PARTICIPANTS: Participant[] = [{ id: 'p1', name: 'You', color: '#688DA5' }];
+
 const initBillAmount   = ss('tipsplit_bill')      ?? '';
-const initTaxRate      = parseFloat(ss('tipsplit_taxrate') ?? '') || DEFAULT_TAX_RATE;
-const initTipPercent   = parseFloat(ss('tipsplit_tip')     ?? '') || 18;
+const initTaxRate      = parseFloat(ss('tipsplit_taxrate')  ?? '') || DEFAULT_TAX_RATE;
+const initTipPercent   = parseFloat(ss('tipsplit_tip')      ?? '') || 18;
 const initTaxInclusive = ss('tipsplit_taxincl') === 'true';
-const initGuestCount   = parseInt(ss('tipsplit_guests')    ?? '', 10) || 2;
+const initGuestCount   = parseInt(ss('tipsplit_guests')     ?? '', 10) || 2;
+const initSplitMode    = (ss('tipsplit_mode') ?? 'even') as 'even' | 'itemized';
+const initReceiptItems = ssJSON<ReceiptItem[]>('tipsplit_items', []);
+const initParticipants = ssJSON<Participant[]>('tipsplit_parts', DEFAULT_PARTICIPANTS);
 
 // ---------------------------------------------------------------------------
 // Store
@@ -123,9 +131,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   subtotal: 0,
   taxAmount: 0,
   totalAmount: 0,
-  splitMode: 'even',
-  participants: [{ id: 'p1', name: 'You', color: '#688DA5' }],
-  receiptItems: [],
+  splitMode: initSplitMode,
+  participants: initParticipants.length > 0 ? initParticipants : DEFAULT_PARTICIPANTS,
+  receiptItems: initReceiptItems,
   restaurantName: '',
 
   setLocationName: (name) => set({ locationName: name }),
@@ -158,7 +166,11 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setCustomTipMode: (v) => set({ customTipMode: v }),
   setScenario: (s) => set({ scenario: s }),
-  setGuestCount: (n) => { ssSet('tipsplit_guests', String(n)); set({ guestCount: n }); },
+
+  setGuestCount: (n) => {
+    ssSet('tipsplit_guests', String(n));
+    set({ guestCount: n });
+  },
 
   setDisplayCurrency: (c) => {
     lsSet('tipsplit_currency', c);
@@ -168,49 +180,61 @@ export const useAppStore = create<AppState>((set, get) => ({
   setExchangeRates: (r) => set({ exchangeRates: r }),
 
   setSplitMode: (m) => {
+    ssSet('tipsplit_mode', m);
     set({ splitMode: m });
     get().computeAmounts();
   },
 
-  setParticipants: (p) => set({ participants: p }),
+  setParticipants: (p) => {
+    ssSet('tipsplit_parts', JSON.stringify(p));
+    set({ participants: p });
+  },
 
   setReceiptItems: (items) => {
+    ssSet('tipsplit_items', JSON.stringify(items));
     set({ receiptItems: items });
     get().computeAmounts();
   },
 
   setRestaurantName: (name) => set({ restaurantName: name }),
 
-  addParticipant: (p) =>
-    set((state) => ({ participants: [...state.participants, p] })),
+  addParticipant: (p) => {
+    const next = [...get().participants, p];
+    ssSet('tipsplit_parts', JSON.stringify(next));
+    set({ participants: next });
+  },
 
-  removeParticipant: (id) =>
-    set((state) => ({
-      participants: state.participants.filter((p) => p.id !== id),
-      receiptItems: state.receiptItems.map((item) => ({
-        ...item,
-        assignedTo: item.assignedTo.filter((pid) => pid !== id),
-      })),
-    })),
+  removeParticipant: (id) => {
+    const nextParts = get().participants.filter((p) => p.id !== id);
+    const nextItems = get().receiptItems.map((item) => ({
+      ...item,
+      assignedTo: item.assignedTo.filter((pid) => pid !== id),
+    }));
+    ssSet('tipsplit_parts', JSON.stringify(nextParts));
+    ssSet('tipsplit_items', JSON.stringify(nextItems));
+    set({ participants: nextParts, receiptItems: nextItems });
+  },
 
   addReceiptItem: (item) => {
-    set((state) => ({ receiptItems: [...state.receiptItems, item] }));
+    const next = [...get().receiptItems, item];
+    ssSet('tipsplit_items', JSON.stringify(next));
+    set({ receiptItems: next });
     get().computeAmounts();
   },
 
   updateReceiptItem: (id, updates) => {
-    set((state) => ({
-      receiptItems: state.receiptItems.map((item) =>
-        item.id === id ? { ...item, ...updates } : item
-      ),
-    }));
+    const next = get().receiptItems.map((item) =>
+      item.id === id ? { ...item, ...updates } : item
+    );
+    ssSet('tipsplit_items', JSON.stringify(next));
+    set({ receiptItems: next });
     get().computeAmounts();
   },
 
   removeReceiptItem: (id) => {
-    set((state) => ({
-      receiptItems: state.receiptItems.filter((item) => item.id !== id),
-    }));
+    const next = get().receiptItems.filter((item) => item.id !== id);
+    ssSet('tipsplit_items', JSON.stringify(next));
+    set({ receiptItems: next });
     get().computeAmounts();
   },
 
@@ -218,7 +242,6 @@ export const useAppStore = create<AppState>((set, get) => ({
     const state = get();
     let subtotal: number;
 
-    // In itemized mode, derive subtotal from receipt items so summary is never zeroed.
     if (state.splitMode === 'itemized' && state.receiptItems.length > 0) {
       subtotal = round2(state.receiptItems.reduce((s, item) => s + item.price, 0));
     } else {
