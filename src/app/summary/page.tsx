@@ -59,7 +59,10 @@ export default function SummaryPage() {
   const [showQRFor, setShowQRFor] = useState<string | null>(null);
   const [showPayQR, setShowPayQR] = useState(false);
   const [capturingId, setCapturingId] = useState<string | null>(null);
+  const [capturingFull, setCapturingFull] = useState(false);
+  const [venmoToast, setVenmoToast] = useState<string | null>(null);
   const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const fullSummaryRef = useRef<HTMLDivElement | null>(null);
 
   const s = translations.summary;
   const fmtUSD = (n: number) => `$${n.toFixed(2)}`;
@@ -134,48 +137,82 @@ export default function SummaryPage() {
     else     { setCopiedAll(true); setTimeout(() => setCopiedAll(false), 2000); }
   };
 
-  const handleShare = async (platform: 'native' | 'sms' | 'venmo') => {
+  const handleShare = async (platform: 'native' | 'sms' | 'venmo' | 'zelle', amount?: number) => {
     const text = buildShareText();
     if (platform === 'native' && navigator.share) {
       try { await navigator.share({ title: 'TipSplit USA', text }); } catch {}
     } else if (platform === 'sms') {
       window.open(`sms:?body=${encodeURIComponent(text)}`);
     } else if (platform === 'venmo') {
-      window.open('venmo://');
+      const amt = (amount ?? totalAmount).toFixed(2);
+      const note = encodeURIComponent(`TipSplit USA${restaurantName ? ` – ${restaurantName}` : ''}`);
+      const venmoUrl = `venmo://paycharge?txn=pay&amount=${amt}&note=${note}`;
+      const opened = window.open(venmoUrl);
+      // Show helpful hint after short delay in case app not installed
+      setTimeout(() => {
+        navigator.clipboard.writeText(amt).catch(() => {});
+        setVenmoToast(amt);
+        setTimeout(() => setVenmoToast(null), 4000);
+      }, 800);
+      if (!opened) {
+        navigator.clipboard.writeText(amt).catch(() => {});
+        setVenmoToast(amt);
+        setTimeout(() => setVenmoToast(null), 4000);
+      }
+    } else if (platform === 'zelle') {
+      const amt = (amount ?? totalAmount).toFixed(2);
+      navigator.clipboard.writeText(amt).catch(() => {});
+      alert(`$${amt} copied! Now open your bank app → Zelle, and paste the amount.`);
     }
   };
 
 
-  const shareCardImage = useCallback(async (row: SummaryRow) => {
-    const el = cardRefs.current[row.id];
+  const captureAndShare = useCallback(async (el: HTMLElement | null, filename: string, onStart: () => void, onEnd: () => void) => {
     if (!el) return;
-    setCapturingId(row.id);
+    onStart();
     try {
       const canvas = await html2canvas(el, {
-        backgroundColor: null,
+        backgroundColor: '#EDE0C0',
         scale: 2,
         useCORS: true,
         logging: false,
       });
       canvas.toBlob(async (blob) => {
         if (!blob) return;
-        const file = new File([blob], 'tipsplit.png', { type: 'image/png' });
+        const file = new File([blob], filename, { type: 'image/png' });
         if (navigator.canShare?.({ files: [file] })) {
-          await navigator.share({ files: [file], title: 'TipSplit USA' });
+          try { await navigator.share({ files: [file], title: 'TipSplit USA' }); } catch {}
         } else {
-          // fallback: download
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
-          a.href = url; a.download = 'tipsplit.png'; a.click();
+          a.href = url; a.download = filename; a.click();
           URL.revokeObjectURL(url);
         }
       }, 'image/png');
     } catch (e) {
       console.error(e);
     } finally {
-      setCapturingId(null);
+      onEnd();
     }
   }, []);
+
+  const shareCardImage = useCallback((row: SummaryRow) => {
+    captureAndShare(
+      cardRefs.current[row.id],
+      `tipsplit-${row.name.toLowerCase().replace(/\s+/g, '-')}.png`,
+      () => setCapturingId(row.id),
+      () => setCapturingId(null),
+    );
+  }, [captureAndShare]);
+
+  const shareFullPage = useCallback(() => {
+    captureAndShare(
+      fullSummaryRef.current,
+      'tipsplit-summary.png',
+      () => setCapturingFull(true),
+      () => setCapturingFull(false),
+    );
+  }, [captureAndShare]);
 
   return (
     <div className="flex flex-col min-h-screen bg-cream-bg pb-28">
@@ -203,7 +240,8 @@ export default function SummaryPage() {
         </div>
       </div>
 
-      <div className="px-4 space-y-4">
+      {/* ── Capturable full-summary region ── */}
+      <div ref={fullSummaryRef} className="px-4 space-y-4" style={{ paddingBottom: 4 }}>
         {/* Grand total hero card */}
         <div
           className="rounded-xl2 p-4"
@@ -303,10 +341,11 @@ export default function SummaryPage() {
                   <button
                     onClick={() => shareCardImage(row)}
                     disabled={capturingId === row.id}
-                    className="px-3 py-2.5 rounded-xl text-sm font-bold transition-all active:scale-95 flex items-center gap-1 bg-cream-deep border border-cream-border text-mocha-mid hover:border-accent-warm/50"
-                    title={lang === 'zh' || lang === 'sc' ? '截圖分享' : 'Share as image'}
+                    className="px-3 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1 bg-cream-deep border border-cream-border text-mocha-mid hover:border-accent-warm/50"
+                    title={lang === 'zh' || lang === 'sc' ? '截圖此人明細' : 'Share this card as image'}
                   >
-                    {capturingId === row.id ? '⏳' : '🖼️'}
+                    {capturingId === row.id ? '⏳' : '📷'}
+                    <span className="text-[10px]">{lang === 'zh' || lang === 'sc' ? '截圖' : lang === 'ja' ? '画像' : lang === 'ko' ? '이미지' : lang === 'es' ? 'Img' : lang === 'pt' ? 'Img' : 'Img'}</span>
                   </button>
                   <button
                     onClick={() => setShowQRFor(showQRFor === row.id ? null : row.id)}
@@ -346,6 +385,20 @@ export default function SummaryPage() {
         {/* Share panel */}
         <div className="card p-4">
           <h3 className="font-bold text-mocha-dark mb-3">{t(s.share, lang)}</h3>
+
+          {/* Full-page screenshot — most prominent */}
+          <button
+            onClick={shareFullPage}
+            disabled={capturingFull}
+            className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-bold text-white text-sm active:scale-[0.98] mb-3 transition-all"
+            style={{ background: 'linear-gradient(135deg, #688DA5 0%, #5A7A92 100%)' }}
+          >
+            {capturingFull
+              ? <><span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⏳</span> {lang === 'zh' || lang === 'sc' ? '截圖中...' : 'Capturing...'}</>
+              : <>{t(translations.calc.shareFullPage, lang)}</>
+            }
+          </button>
+
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={() => handleShare('native')}
@@ -360,15 +413,22 @@ export default function SummaryPage() {
               {t(s.iMessage, lang)}
             </button>
             <button
-              onClick={() => handleShare('venmo')}
+              onClick={() => handleShare('venmo', rows.length > 0 ? rows[0].total : totalAmount)}
               className="flex items-center justify-center gap-2 py-3 rounded-xl bg-[#3D95CE] text-white font-bold text-sm active:scale-95"
             >
               {t(s.venmo, lang)}
             </button>
             <button
+              onClick={() => handleShare('zelle', rows.length > 0 ? rows[0].total : totalAmount)}
+              className="flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm active:scale-95"
+              style={{ background: '#6D1ED4', color: '#fff' }}
+            >
+              💛 Zelle
+            </button>
+            <button
               onClick={() => copy(buildShareText())}
               className={clsx(
-                'flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm active:scale-95 border',
+                'col-span-2 flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm active:scale-95 border',
                 copiedAll ? 'bg-accent-sage text-white border-accent-sage' : 'bg-cream-deep border-cream-border text-mocha-dark'
               )}
             >
@@ -376,6 +436,12 @@ export default function SummaryPage() {
             </button>
           </div>
 
+          {/* Venmo toast */}
+          {venmoToast && (
+            <div className="mt-3 p-3 rounded-xl text-xs animate-slide-up" style={{ background: 'rgba(61,149,206,0.1)', border: '1px solid #3D95CE', color: '#3D95CE' }}>
+              💡 <strong>${venmoToast}</strong> {lang === 'zh' || lang === 'sc' ? '已複製！若 Venmo 未開啟，請手動貼入金額欄位。' : lang === 'ja' ? 'をコピーしました！Venmoが開かない場合は手動で貼り付けてください。' : lang === 'ko' ? '복사됨! Venmo가 열리지 않으면 수동으로 붙여넣으세요.' : lang === 'es' ? 'copiado. Si Venmo no abrió, pégalo manualmente.' : lang === 'pt' ? 'copiado. Se o Venmo não abriu, cole manualmente.' : 'copied! If Venmo didn\'t open, paste the amount manually.'}
+            </div>
+          )}
           {/* Preview */}
           <div className="mt-3 p-3 rounded-xl bg-cream-bg border border-cream-border">
             <p className="text-xs text-mocha-light mb-1 font-medium">{t(s.preview, lang)}</p>

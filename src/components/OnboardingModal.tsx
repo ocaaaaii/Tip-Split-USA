@@ -246,7 +246,7 @@ export default function OnboardingModal({ onDone }: Props) {
           <button
             onClick={onDone}
             className="px-4 py-3.5 rounded-xl font-semibold text-sm active:scale-95 transition-all"
-            style={{ background: 'var(--cream-card)', border: '1.5px solid var(--cream-border)', color: 'var(--mocha-light)', minWidth: 52 }}
+            style={{ background: 'var(--cream-bg)', border: '1.5px solid var(--mocha-light)', color: 'var(--mocha-dark)', minWidth: 52 }}
           >
             {SKIP_BTN[lang]}
           </button>

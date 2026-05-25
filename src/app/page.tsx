@@ -134,13 +134,13 @@ export default function HomePage() {
         <div>
           <div className="flex items-center justify-between mb-2 px-0.5">
             <h2 className="text-xs font-semibold text-mocha-light uppercase tracking-wider">
-              {lang === 'en' ? 'Scenario' : lang === 'zh' || lang === 'sc' ? '消費場景' : 'Scenario'}
+              {t(c.scenario, lang)}
             </h2>
             <button
               onClick={() => setShowTipCulture(true)}
               className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold transition-all active:scale-90 hover:bg-accent-warm/10"
               style={{ color: '#688DA5', border: '1.5px solid #688DA5' }}
-              title={lang === 'zh' ? '小費文化說明' : 'Tip Culture Guide'}
+              title={t(c.tipCultureGuide, lang)}
             >
               i
             </button>
@@ -157,7 +157,7 @@ export default function HomePage() {
         {/* ── Guest Count ── */}
         <div className="card p-3 flex items-center justify-between">
           <span className="text-sm text-mocha-mid font-semibold">
-            👥 {lang === 'en' ? 'Guests' : lang === 'zh' || lang === 'sc' ? '用餐人數' : 'Guests'}
+            👥 {t(c.guests, lang)}
           </span>
           <div className="flex items-center gap-3">
             <button
@@ -175,7 +175,7 @@ export default function HomePage() {
         {/* ── Tip Buttons ── */}
         <div>
           <h2 className="text-xs font-semibold text-mocha-light uppercase tracking-wider mb-2 px-0.5">
-            {lang === 'en' ? 'Tip Rate' : '小費比率'}
+            {t(c.tipRate, lang)}
           </h2>
           <div className="grid grid-cols-5 gap-2">
             {quickTips.map((pct) => (

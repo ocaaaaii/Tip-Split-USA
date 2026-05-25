@@ -48,7 +48,12 @@ export const translations = {
     },
     selectTax:  { zh: '選擇稅率', sc: '选擇税率', en: 'Select Tax Rate', ja: '税率を選択', ko: '세율 선택', es: 'Seleccionar impuesto', pt: 'Selecionar imposto' },
     customRate: { zh: '自訂稅率', sc: '自訂税率', en: 'Custom Rate',     ja: 'カスタム税率', ko: '사용자 정의 세율', es: 'Tasa personalizada', pt: 'Taxa personalizada' },
-    apply:      { zh: '套用', sc: '套用', en: 'Apply', ja: '適用', ko: '적용', es: 'Aplicar', pt: 'Aplicar' },
+    apply:           { zh: '套用', sc: '套用', en: 'Apply', ja: '適用', ko: '적용', es: 'Aplicar', pt: 'Aplicar' },
+    tipCultureGuide: { zh: '小費文化說明', sc: '小费文化说明', en: 'Tip Culture Guide', ja: 'チップ文化ガイド', ko: '팁 문화 가이드', es: 'Guía de propinas', pt: 'Guia de gorjetas' },
+    shareFullPage:   { zh: '📸 分享整頁帳單', sc: '📸 分享整页账单', en: '📸 Share Full Summary', ja: '📸 全体をシェア', ko: '📸 전체 공유', es: '📸 Compartir resumen', pt: '📸 Compartilhar resumo' },
+    shareTo:         { zh: '分享至…', sc: '分享至…', en: 'Share to…', ja: 'シェア先…', ko: '공유 대상…', es: 'Compartir a…', pt: 'Compartilhar para…' },
+    venmoNotInstalled: { zh: '💡 未安裝 Venmo？長按複製金額後，手動貼入 Venmo 備註欄', sc: '💡 未安装 Venmo？长按复制金额后，手动贴入 Venmo 备注栏', en: "💡 Venmo not installed? The amount is copied — paste it into Venmo's note field.", ja: '💡 Venmoが入っていませんか？金額をコピーしてVenmoのメモ欄に貼ってください', ko: '💡 Venmo가 없으신가요? 금액이 복사됨 — Venmo 메모에 붙여넣으세요', es: '💡 ¿Sin Venmo? El monto está copiado — pégalo en la nota de Venmo.', pt: '💡 Sem Venmo? O valor foi copiado — cole na nota do Venmo.' },
+    zelleCopy:       { zh: '💛 複製金額 → 去 Zelle', sc: '💛 复制金额 → 去 Zelle', en: '💛 Copy Amount → Open Zelle', ja: '💛 金額コピー → Zelleへ', ko: '💛 금액 복사 → Zelle 열기', es: '💛 Copiar monto → Abrir Zelle', pt: '💛 Copiar valor → Abrir Zelle' },
   },
 
   scenarios: {
