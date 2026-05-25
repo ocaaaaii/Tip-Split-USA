@@ -8,6 +8,33 @@ import type { Lang } from '@/lib/i18n';
 export type Scenario = 'restaurant' | 'takeout' | 'bar' | 'taxi' | 'hotel' | 'salon' | 'delivery';
 export type Theme = 'system' | 'light' | 'dark';
 
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+function ss(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try { return sessionStorage.getItem(key); } catch { return null; }
+}
+function ssSet(key: string, value: string): void {
+  if (typeof window === 'undefined') return;
+  try { sessionStorage.setItem(key, value); } catch { /* ignore */ }
+}
+function ls(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try { return localStorage.getItem(key); } catch { return null; }
+}
+function lsSet(key: string, value: string): void {
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(key, value); } catch { /* ignore */ }
+}
+
+function round2(n: number): number {
+  return Math.round(n * 100) / 100;
+}
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 export interface AppState {
   lang: Lang;
   setLang: (l: Lang) => void;
@@ -55,33 +82,42 @@ export interface AppState {
   computeAmounts: () => void;
 }
 
-function round2(n: number): number {
-  return Math.round(n * 100) / 100;
-}
+// ---------------------------------------------------------------------------
+// Initial values read from storage (runs once at module load — client only)
+// ---------------------------------------------------------------------------
+const initBillAmount   = ss('tipsplit_bill')    ?? '';
+const initTaxRate      = parseFloat(ss('tipsplit_taxrate') ?? '') || DEFAULT_TAX_RATE;
+const initTipPercent   = parseFloat(ss('tipsplit_tip')     ?? '') || 18;
+const initTaxInclusive = ss('tipsplit_taxincl') === 'true';
 
+// ---------------------------------------------------------------------------
+// Store
+// ---------------------------------------------------------------------------
 export const useAppStore = create<AppState>((set, get) => ({
-  lang: (typeof window !== 'undefined' ? (localStorage.getItem('tipsplit_lang') as Lang | null) : null) ?? 'en' as Lang,
-  setLang: (l) => { if (typeof window !== 'undefined') localStorage.setItem('tipsplit_lang', l); set({ lang: l }); },
-  theme: (typeof window !== 'undefined' ? (localStorage.getItem('tipsplit_theme') as Theme | null) : null) ?? 'system',
+  lang: (ls('tipsplit_lang') as Lang | null) ?? 'en',
+  setLang: (l) => { lsSet('tipsplit_lang', l); set({ lang: l }); },
+
+  theme: (ls('tipsplit_theme') as Theme | null) ?? 'system',
   setTheme: (t) => {
-    if (typeof window !== 'undefined') localStorage.setItem('tipsplit_theme', t);
+    lsSet('tipsplit_theme', t);
     const html = document.documentElement;
-    if (t === 'dark')  { html.setAttribute('data-theme', 'dark'); }
-    else if (t === 'light') { html.setAttribute('data-theme', 'light'); }
-    else               { html.removeAttribute('data-theme'); }
+    if (t === 'dark')       html.setAttribute('data-theme', 'dark');
+    else if (t === 'light') html.setAttribute('data-theme', 'light');
+    else                    html.removeAttribute('data-theme');
     set({ theme: t });
   },
+
   locationName: 'Detecting location...',
-  taxRate: DEFAULT_TAX_RATE,
+  taxRate: initTaxRate,
   isOffline: false,
-  billAmount: '',
-  isTaxInclusive: false,
-  tipPercent: 18,
+  billAmount: initBillAmount,
+  isTaxInclusive: initTaxInclusive,
+  tipPercent: initTipPercent,
   tipAmount: 0,
   customTipMode: false,
   scenario: 'restaurant',
   guestCount: 2,
-  displayCurrency: (typeof window !== 'undefined' ? (localStorage.getItem('tipsplit_currency') as CurrencyCode | null) : null) ?? 'NONE' as CurrencyCode,
+  displayCurrency: (ls('tipsplit_currency') as CurrencyCode | null) ?? 'NONE',
   exchangeRates: FALLBACK_RATES,
   subtotal: 0,
   taxAmount: 0,
@@ -90,60 +126,109 @@ export const useAppStore = create<AppState>((set, get) => ({
   participants: [{ id: 'p1', name: 'You', color: '#688DA5' }],
   receiptItems: [],
   restaurantName: '',
+
   setLocationName: (name) => set({ locationName: name }),
-  setTaxRate: (rate) => { set({ taxRate: rate }); get().computeAmounts(); },
+
+  setTaxRate: (rate) => {
+    ssSet('tipsplit_taxrate', String(rate));
+    set({ taxRate: rate });
+    get().computeAmounts();
+  },
+
   setIsOffline: (v) => set({ isOffline: v }),
-  setBillAmount: (v) => { set({ billAmount: v }); get().computeAmounts(); },
-  setIsTaxInclusive: (v) => { set({ isTaxInclusive: v }); get().computeAmounts(); },
-  setTipPercent: (v) => { set({ tipPercent: v, customTipMode: false }); get().computeAmounts(); },
+
+  setBillAmount: (v) => {
+    ssSet('tipsplit_bill', v);
+    set({ billAmount: v });
+    get().computeAmounts();
+  },
+
+  setIsTaxInclusive: (v) => {
+    ssSet('tipsplit_taxincl', String(v));
+    set({ isTaxInclusive: v });
+    get().computeAmounts();
+  },
+
+  setTipPercent: (v) => {
+    ssSet('tipsplit_tip', String(v));
+    set({ tipPercent: v, customTipMode: false });
+    get().computeAmounts();
+  },
+
   setCustomTipMode: (v) => set({ customTipMode: v }),
   setScenario: (s) => set({ scenario: s }),
   setGuestCount: (n) => set({ guestCount: n }),
-  setDisplayCurrency: (c) => { if (typeof window !== 'undefined') localStorage.setItem('tipsplit_currency', c); set({ displayCurrency: c }); },
+
+  setDisplayCurrency: (c) => {
+    lsSet('tipsplit_currency', c);
+    set({ displayCurrency: c });
+  },
+
   setExchangeRates: (r) => set({ exchangeRates: r }),
-  setSplitMode: (m) => { set({ splitMode: m }); get().computeAmounts(); },
+
+  setSplitMode: (m) => {
+    set({ splitMode: m });
+    get().computeAmounts();
+  },
+
   setParticipants: (p) => set({ participants: p }),
-  setReceiptItems: (items) => { set({ receiptItems: items }); get().computeAmounts(); },
+
+  setReceiptItems: (items) => {
+    set({ receiptItems: items });
+    get().computeAmounts();
+  },
+
   setRestaurantName: (name) => set({ restaurantName: name }),
-  addParticipant: (p) => set((state) => ({ participants: [...state.participants, p] })),
-  removeParticipant: (id) => set((state) => ({
-    participants: state.participants.filter((p) => p.id !== id),
-    receiptItems: state.receiptItems.map((item) => ({
-      ...item,
-      assignedTo: item.assignedTo.filter((pid) => pid !== id),
+
+  addParticipant: (p) =>
+    set((state) => ({ participants: [...state.participants, p] })),
+
+  removeParticipant: (id) =>
+    set((state) => ({
+      participants: state.participants.filter((p) => p.id !== id),
+      receiptItems: state.receiptItems.map((item) => ({
+        ...item,
+        assignedTo: item.assignedTo.filter((pid) => pid !== id),
+      })),
     })),
-  })),
+
   addReceiptItem: (item) => {
     set((state) => ({ receiptItems: [...state.receiptItems, item] }));
     get().computeAmounts();
   },
+
   updateReceiptItem: (id, updates) => {
     set((state) => ({
-      receiptItems: state.receiptItems.map((item) => item.id === id ? { ...item, ...updates } : item),
+      receiptItems: state.receiptItems.map((item) =>
+        item.id === id ? { ...item, ...updates } : item
+      ),
     }));
     get().computeAmounts();
   },
+
   removeReceiptItem: (id) => {
     set((state) => ({
       receiptItems: state.receiptItems.filter((item) => item.id !== id),
     }));
     get().computeAmounts();
   },
+
   computeAmounts: () => {
     const state = get();
     let subtotal: number;
 
-    // In itemized mode, derive subtotal from the sum of receiptItems so the
-    // summary page is never zeroed out by an empty billAmount field.
+    // In itemized mode, derive subtotal from receipt items so summary is never zeroed.
     if (state.splitMode === 'itemized' && state.receiptItems.length > 0) {
       subtotal = round2(state.receiptItems.reduce((s, item) => s + item.price, 0));
     } else {
       const raw = parseFloat(state.billAmount) || 0;
-      subtotal = state.isTaxInclusive ? round2(raw / (1 + state.taxRate / 100)) : round2(raw);
+      subtotal = state.isTaxInclusive
+        ? round2(raw / (1 + state.taxRate / 100))
+        : round2(raw);
     }
 
-    const taxAmount = Math.round(subtotal * state.taxRate) / 100;
-    const tipAmount = Math.round(subtotal * state.tipPercent) / 100;
+    const taxAmount   = Math.round(subtotal * state.taxRate) / 100;
+    const tipAmount   = Math.round(subtotal * state.tipPercent) / 100;
     const totalAmount = round2(subtotal + taxAmount + tipAmount);
     set({ subtotal, taxAmount, tipAmount, totalAmount });
   },
