@@ -101,9 +101,9 @@ export const useAppStore = create<AppState>((set, get) => ({
   setGuestCount: (n) => set({ guestCount: n }),
   setDisplayCurrency: (c) => { if (typeof window !== 'undefined') localStorage.setItem('tipsplit_currency', c); set({ displayCurrency: c }); },
   setExchangeRates: (r) => set({ exchangeRates: r }),
-  setSplitMode: (m) => set({ splitMode: m }),
+  setSplitMode: (m) => { set({ splitMode: m }); get().computeAmounts(); },
   setParticipants: (p) => set({ participants: p }),
-  setReceiptItems: (items) => set({ receiptItems: items }),
+  setReceiptItems: (items) => { set({ receiptItems: items }); get().computeAmounts(); },
   setRestaurantName: (name) => set({ restaurantName: name }),
   addParticipant: (p) => set((state) => ({ participants: [...state.participants, p] })),
   removeParticipant: (id) => set((state) => ({
@@ -113,18 +113,35 @@ export const useAppStore = create<AppState>((set, get) => ({
       assignedTo: item.assignedTo.filter((pid) => pid !== id),
     })),
   })),
-  addReceiptItem: (item) => set((state) => ({ receiptItems: [...state.receiptItems, item] })),
-  updateReceiptItem: (id, updates) => set((state) => ({
-    receiptItems: state.receiptItems.map((item) => item.id === id ? { ...item, ...updates } : item),
-  })),
-  removeReceiptItem: (id) => set((state) => ({
-    receiptItems: state.receiptItems.filter((item) => item.id !== id),
-  })),
+  addReceiptItem: (item) => {
+    set((state) => ({ receiptItems: [...state.receiptItems, item] }));
+    get().computeAmounts();
+  },
+  updateReceiptItem: (id, updates) => {
+    set((state) => ({
+      receiptItems: state.receiptItems.map((item) => item.id === id ? { ...item, ...updates } : item),
+    }));
+    get().computeAmounts();
+  },
+  removeReceiptItem: (id) => {
+    set((state) => ({
+      receiptItems: state.receiptItems.filter((item) => item.id !== id),
+    }));
+    get().computeAmounts();
+  },
   computeAmounts: () => {
     const state = get();
-    const raw = parseFloat(state.billAmount) || 0;
-    let subtotal = state.isTaxInclusive ? raw / (1 + state.taxRate / 100) : raw;
-    subtotal = Math.round(subtotal * 100) / 100;
+    let subtotal: number;
+
+    // In itemized mode, derive subtotal from the sum of receiptItems so the
+    // summary page is never zeroed out by an empty billAmount field.
+    if (state.splitMode === 'itemized' && state.receiptItems.length > 0) {
+      subtotal = round2(state.receiptItems.reduce((s, item) => s + item.price, 0));
+    } else {
+      const raw = parseFloat(state.billAmount) || 0;
+      subtotal = state.isTaxInclusive ? round2(raw / (1 + state.taxRate / 100)) : round2(raw);
+    }
+
     const taxAmount = Math.round(subtotal * state.taxRate) / 100;
     const tipAmount = Math.round(subtotal * state.tipPercent) / 100;
     const totalAmount = round2(subtotal + taxAmount + tipAmount);

@@ -5,14 +5,12 @@ export interface ReceiptItem {
   name: string;
   price: number;
   assignedTo: string[];   // participant IDs
-  isAlcohol?: boolean;    // 🍷 alcohol flag — non-drinkers excluded automatically
 }
 
 export interface Participant {
   id: string;
   name: string;
   color: string;
-  isDrinker?: boolean;    // default true; false = excluded from alcohol items
 }
 
 export interface ParticipantSplit {
@@ -21,13 +19,14 @@ export interface ParticipantSplit {
   taxShare: number;
   tipShare: number;
   total: number;
-  items: { name: string; price: number; shared?: boolean; isAlcohol?: boolean }[];
+  items: { name: string; price: number; shared?: boolean }[];
   isRemainder?: boolean;
 }
 
 /**
  * Core split algorithm (proportional tax+tip).
- * Alcohol items are split only among participants where isDrinker !== false.
+ * Each item is split equally among its assignedTo participants.
+ * Tax and tip are distributed proportionally to each person's food share.
  */
 export function calculateItemizedSplit(
   items: ReceiptItem[],
@@ -40,32 +39,22 @@ export function calculateItemizedSplit(
 
   const participantMap: Record<string, {
     subtotal: number;
-    items: { name: string; price: number; shared?: boolean; isAlcohol?: boolean }[];
+    items: { name: string; price: number; shared?: boolean }[];
   }> = {};
   participants.forEach((p) => { participantMap[p.id] = { subtotal: 0, items: [] }; });
 
   for (const item of items) {
     if (item.assignedTo.length === 0) continue;
+    const share = item.price / item.assignedTo.length;
+    const isShared = item.assignedTo.length > 1;
 
-    // For alcohol items, restrict to drinkers among assignedTo
-    const eligibleIds = item.isAlcohol
-      ? item.assignedTo.filter((pid) => {
-          const p = participants.find((pp) => pp.id === pid);
-          return p ? p.isDrinker !== false : true;
-        })
-      : item.assignedTo;
-
-    const share = eligibleIds.length > 0 ? item.price / eligibleIds.length : 0;
-    const isShared = eligibleIds.length > 1;
-
-    for (const pid of eligibleIds) {
+    for (const pid of item.assignedTo) {
       if (!participantMap[pid]) continue;
       participantMap[pid].subtotal = round2(participantMap[pid].subtotal + share);
       participantMap[pid].items.push({
         name: item.name,
         price: round2(share),
         shared: isShared,
-        isAlcohol: item.isAlcohol,
       });
     }
   }
@@ -85,7 +74,7 @@ export function calculateItemizedSplit(
     };
   });
 
-  // 1-cent rounding fix
+  // 1-cent rounding fix — assign remainder to first person
   const computedTotal = round2(rawSplits.reduce((s, r) => s + r.total, 0));
   const expectedTotal = round2(subtotal + totalTax + totalTip);
   const remainder = round2(expectedTotal - computedTotal);

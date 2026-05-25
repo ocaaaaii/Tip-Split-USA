@@ -44,7 +44,6 @@ export default function ItemizedPage() {
       const result = await Tesseract.recognize(file, 'eng', { logger: () => {} });
       const lines = result.data.text.split('\n').map((l) => l.trim()).filter(Boolean);
 
-      // ── Service charge detection (before line filtering) ──────────────────
       const detected = lines.some((line) =>
         SERVICE_CHARGE_KEYWORDS.some((kw) => line.toLowerCase().includes(kw))
       );
@@ -91,16 +90,8 @@ export default function ItemizedPage() {
   const handleAddParticipant = () => {
     if (!newParticipantName.trim()) return;
     const colorIdx = participants.length % PARTICIPANT_COLORS.length;
-    addParticipant({ id: genId(), name: newParticipantName.trim(), color: PARTICIPANT_COLORS[colorIdx], isDrinker: true });
+    addParticipant({ id: genId(), name: newParticipantName.trim(), color: PARTICIPANT_COLORS[colorIdx] });
     setNewParticipantName('');
-  };
-
-  // ── Toggle participant drinker status ─────────────────────────────────────
-  const toggleDrinker = (id: string) => {
-    const p = participants.find((pp) => pp.id === id);
-    if (!p) return;
-    const { setParticipants } = useAppStore.getState();
-    setParticipants(participants.map((pp) => pp.id === id ? { ...pp, isDrinker: pp.isDrinker === false ? true : false } : pp));
   };
 
   // ── Assign item ───────────────────────────────────────────────────────────
@@ -115,14 +106,6 @@ export default function ItemizedPage() {
     });
   };
 
-  // ── Toggle alcohol flag ───────────────────────────────────────────────────
-  const toggleAlcohol = (itemId: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const item = receiptItems.find((it) => it.id === itemId);
-    if (!item) return;
-    updateReceiptItem(itemId, { isAlcohol: !item.isAlcohol });
-  };
-
   // ── Go to summary ─────────────────────────────────────────────────────────
   const handleGoSummary = () => {
     const unassigned = receiptItems.filter((it) => it.assignedTo.length === 0).length;
@@ -134,7 +117,26 @@ export default function ItemizedPage() {
   const totalAssigned = receiptItems.reduce((s, it) => s + it.price, 0);
   const allAssigned   = receiptItems.every((it) => it.assignedTo.length > 0) && receiptItems.length > 0;
   const unassignedCount = receiptItems.filter((it) => it.assignedTo.length === 0).length;
-  const hasAlcohol = receiptItems.some((it) => it.isAlcohol);
+
+  const assignHint =
+    lang === 'zh' || lang === 'sc' ? '點擊每個品項 → 選擇誰要付這道' :
+    lang === 'ja' ? '各品目をタップ → 誰が払うか選択' :
+    lang === 'ko' ? '각 항목을 탭 → 누가 낼지 선택' :
+    lang === 'es' || lang === 'pt' ? 'Toca cada ítem → selecciona quién paga' :
+    'Tap each item → select who pays for it';
+
+  const assignLabel =
+    lang === 'zh' || lang === 'sc' ? '指派 ▸' :
+    lang === 'ja' ? '割当 ▸' :
+    lang === 'ko' ? '할당 ▸' :
+    'Assign ▸';
+
+  const whoPayQuestion =
+    lang === 'zh' || lang === 'sc' ? '✅ 選擇誰要付這道：' :
+    lang === 'ja' ? '✅ 誰が払うか選んでください：' :
+    lang === 'ko' ? '✅ 누가 낼지 선택：' :
+    lang === 'es' || lang === 'pt' ? '✅ Selecciona quién paga:' :
+    '✅ Who pays for this item?';
 
   return (
     <div className="flex flex-col min-h-screen bg-cream-bg pb-28">
@@ -177,7 +179,7 @@ export default function ItemizedPage() {
           <p className="text-xs text-mocha-light mt-2 text-center">{t(i.manualEntry, lang)}</p>
         </div>
 
-        {/* ── Service Charge Warning ── */}
+        {/* Service Charge Warning */}
         {serviceChargeDetected && (
           <div
             className="animate-pop-in rounded-xl p-4 flex items-start gap-3"
@@ -186,12 +188,16 @@ export default function ItemizedPage() {
             <span className="text-xl flex-shrink-0">⚠️</span>
             <div>
               <p className="font-bold text-sm" style={{ color: '#C4581A' }}>
-                {lang === 'zh' ? '偵測到服務費！' : 'Service Charge Detected!'}
+                {lang === 'zh' || lang === 'sc' ? '偵測到服務費！' : lang === 'ja' ? 'サービス料を検出！' : lang === 'ko' ? '서비스 요금 감지!' : lang === 'es' || lang === 'pt' ? '¡Cargo por servicio detectado!' : 'Service Charge Detected!'}
               </p>
               <p className="text-xs mt-0.5" style={{ color: '#6B3A20' }}>
-                {lang === 'zh'
-                  ? '帳單已含 Service Charge / Gratuity，建議將小費設為 0% 避免重複給小費！'
-                  : 'Your bill already includes a Service Charge or Gratuity. Set tip to 0% to avoid double-tipping!'}
+                {lang === 'zh' || lang === 'sc'
+                  ? '帳單已含 Service Charge，建議將小費設為 0% 避免重複給小費！'
+                  : lang === 'ja'
+                    ? '請求書にサービス料が含まれています。チップを0%に設定してください！'
+                    : lang === 'ko'
+                      ? '청구서에 서비스 요금이 포함되어 있습니다. 팁을 0%로 설정하세요!'
+                      : 'Your bill already includes a Service Charge. Set tip to 0% to avoid double-tipping!'}
               </p>
             </div>
           </div>
@@ -200,26 +206,6 @@ export default function ItemizedPage() {
         {/* Participants */}
         <div className="card p-4">
           <h2 className="font-bold text-mocha-dark mb-3">{t(i.participants, lang)}</h2>
-          {/* Alcohol hint — always visible so users discover the feature */}
-          <div className="mb-2 px-2 py-1.5 rounded-lg flex items-center gap-1.5" style={{ background: 'rgba(104,141,165,0.10)' }}>
-            <span className="text-xs">🍷</span>
-            <p className="text-xs" style={{ color: '#688DA5' }}>
-              {lang === 'zh'
-                ? '品項旁點 🍷 標記酒水；🍺 設定不喝酒成員，自動排除'
-                : lang === 'ja'
-                  ? '品目の🍷でお酒をマーク；🍺で飲まないメンバーを除外'
-                  : lang === 'ko'
-                    ? '품목 옆 🍷로 주류 표시；🍺로 음주 안 하는 멤버 제외'
-                    : lang === 'es' || lang === 'pt'
-                      ? 'Toca 🍷 en un ítem para marcar alcohol；🍺 excluye a quien no bebe'
-                      : 'Tap 🍷 on an item to mark alcohol; 🍺 to exclude non-drinkers'}
-            </p>
-          </div>
-          {hasAlcohol && (
-            <p className="text-xs mb-2" style={{ color: '#688DA5' }}>
-              🍷 {lang === 'zh' ? '點擊 🍺 切換「不喝酒」，酒水品項將自動排除該成員' : 'Tap 🍺 to mark as non-drinker — alcohol items exclude them automatically'}
-            </p>
-          )}
           <div className="flex flex-wrap gap-2 mb-3">
             {participants.map((p: Participant) => (
               <div
@@ -227,17 +213,7 @@ export default function ItemizedPage() {
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium"
                 style={{ background: p.color + '20', border: `1.5px solid ${p.color}`, color: p.color }}
               >
-                <span style={{ opacity: p.isDrinker === false ? 0.5 : 1 }}>{p.name}</span>
-                {hasAlcohol && (
-                  <button
-                    onClick={() => toggleDrinker(p.id)}
-                    className="text-xs"
-                    title={lang === 'zh' ? '切換飲酒狀態' : 'Toggle drinker'}
-                    style={{ opacity: p.isDrinker === false ? 0.4 : 1 }}
-                  >
-                    🍺
-                  </button>
-                )}
+                <span>{p.name}</span>
                 {participants.length > 1 && (
                   <button onClick={() => removeParticipant(p.id)} className="text-xs opacity-60 hover:opacity-100">✕</button>
                 )}
@@ -258,14 +234,18 @@ export default function ItemizedPage() {
 
         {/* Items */}
         <div className="card p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-bold text-mocha-dark">{t(i.items, lang)}</h2>
-            {hasAlcohol && (
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{ background: 'rgba(104,141,165,0.15)', color: '#688DA5' }}>
-                🍷 {lang === 'zh' ? '酒水標記中' : 'Alcohol mode on'}
-              </span>
-            )}
-          </div>
+          <h2 className="font-bold text-mocha-dark mb-3">{t(i.items, lang)}</h2>
+
+          {/* Tap-to-assign hint */}
+          {receiptItems.length > 0 && (
+            <div
+              className="mb-3 px-3 py-2.5 rounded-xl flex items-center gap-2"
+              style={{ background: 'rgba(196,88,26,0.08)', border: '1.5px dashed rgba(196,88,26,0.40)' }}
+            >
+              <span className="text-base flex-shrink-0">👆</span>
+              <p className="text-xs font-medium" style={{ color: '#C4581A' }}>{assignHint}</p>
+            </div>
+          )}
 
           {receiptItems.length === 0 ? (
             <p className="text-sm text-mocha-light text-center py-4">{t(i.noItems, lang)}</p>
@@ -273,14 +253,18 @@ export default function ItemizedPage() {
             <div className="space-y-2 mb-3">
               {receiptItems.map((item: ReceiptItem) => {
                 const isSelected = selectedItem === item.id;
+                const isUnassigned = item.assignedTo.length === 0;
                 return (
                   <div key={item.id}>
                     <button
                       onClick={() => setSelectedItem(isSelected ? null : item.id)}
                       className={clsx(
                         'w-full flex items-center justify-between p-3 rounded-xl border transition-all text-left',
-                        item.isAlcohol ? 'bg-blue-50 border-[#688DA5]/40' :
-                        isSelected ? 'bg-accent-warm/5 border-accent-warm' : 'bg-cream-bg border-cream-border hover:border-accent-warm/30'
+                        isSelected
+                          ? 'bg-accent-warm/5 border-accent-warm'
+                          : isUnassigned
+                            ? 'bg-cream-bg border-accent-warm/40 hover:border-accent-warm'
+                            : 'bg-cream-bg border-cream-border hover:border-accent-warm/30'
                       )}
                     >
                       <div className="flex items-center gap-2 min-w-0">
@@ -295,24 +279,20 @@ export default function ItemizedPage() {
                           )}
                         </div>
                         <span className="text-sm font-medium text-mocha-dark truncate">{item.name}</span>
-                        {item.isAlcohol && <span className="text-xs flex-shrink-0">🍷</span>}
                         {item.assignedTo.length > 1 && (
                           <span className="text-xs text-mocha-light flex-shrink-0">÷{item.assignedTo.length}</span>
                         )}
                       </div>
                       <div className="flex items-center gap-2 flex-shrink-0">
                         <span className="font-bold text-mocha-dark">${item.price.toFixed(2)}</span>
-                        <button
-                          onClick={(e) => toggleAlcohol(item.id, e)}
-                          className="text-sm px-1.5 py-0.5 rounded-lg transition-all"
-                          style={{
-                            background: item.isAlcohol ? '#688DA520' : 'transparent',
-                            border: item.isAlcohol ? '1px solid #688DA5' : '1px solid transparent',
-                          }}
-                          title={lang === 'zh' ? '標記為酒精飲料' : 'Mark as alcohol'}
-                        >
-                          🍷
-                        </button>
+                        {isUnassigned && !isSelected && (
+                          <span
+                            className="text-[10px] font-bold px-1.5 py-0.5 rounded-md"
+                            style={{ background: 'rgba(196,88,26,0.12)', color: '#C4581A' }}
+                          >
+                            {assignLabel}
+                          </span>
+                        )}
                         <button
                           onClick={(e) => { e.stopPropagation(); removeReceiptItem(item.id); }}
                           className="text-xs text-mocha-light hover:text-accent-orange px-1"
@@ -322,35 +302,29 @@ export default function ItemizedPage() {
 
                     {isSelected && (
                       <div className="mt-1.5 pl-2 animate-slide-up">
-                        <p className="text-xs text-mocha-light mb-1.5">{t(i.assignTo, lang)}</p>
-                        {item.isAlcohol && (
-                          <p className="text-xs mb-1.5" style={{ color: '#688DA5' }}>
-                            🍷 {lang === 'zh' ? '酒水品項：非飲酒者自動排除' : 'Alcohol item: non-drinkers excluded automatically'}
-                          </p>
-                        )}
+                        <p className="text-xs font-semibold mb-2" style={{ color: '#C4581A' }}>
+                          {whoPayQuestion}
+                        </p>
                         <div className="flex flex-wrap gap-2">
                           {participants.map((p: Participant) => {
                             const assigned = item.assignedTo.includes(p.id);
-                            const excluded = item.isAlcohol && p.isDrinker === false;
                             return (
                               <button
                                 key={p.id}
-                                onClick={() => !excluded && handleAssign(item.id, p.id)}
-                                disabled={excluded}
+                                onClick={() => handleAssign(item.id, p.id)}
                                 className={clsx(
                                   'px-3 py-1.5 rounded-full text-sm font-medium transition-all border active:scale-95',
-                                  excluded ? 'opacity-30 cursor-not-allowed border-cream-border text-mocha-light' :
                                   assigned ? 'text-white border-transparent' : 'bg-transparent border-cream-border text-mocha-mid'
                                 )}
-                                style={assigned && !excluded ? { background: p.color, borderColor: p.color } : {}}
+                                style={assigned ? { background: p.color, borderColor: p.color } : {}}
                               >
-                                {excluded ? '🚫 ' : ''}{p.name}
+                                {p.name}
                               </button>
                             );
                           })}
                         </div>
                         {item.assignedTo.length > 1 && (
-                          <p className="text-xs text-mocha-light mt-1">
+                          <p className="text-xs text-mocha-light mt-2">
                             {t(i.eachPays, lang)} ${(item.price / item.assignedTo.length).toFixed(2)}
                           </p>
                         )}
@@ -410,10 +384,7 @@ export default function ItemizedPage() {
                       {sp.participant.name[0]}
                     </span>
                     <div className="min-w-0">
-                      <p className="font-medium text-mocha-dark text-sm">
-                        {sp.participant.name}
-                        {sp.participant.isDrinker === false && <span className="ml-1 text-xs text-mocha-light">🚫🍺</span>}
-                      </p>
+                      <p className="font-medium text-mocha-dark text-sm">{sp.participant.name}</p>
                       <p className="text-xs text-mocha-light truncate">
                         {t(i.food, lang)} ${sp.subtotal.toFixed(2)} · {t(i.tax, lang)} ${sp.taxShare.toFixed(2)} · {t(i.tip, lang)} ${sp.tipShare.toFixed(2)}
                         {sp.isRemainder && ' (+$0.01)'}
