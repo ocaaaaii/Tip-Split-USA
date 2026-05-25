@@ -72,8 +72,9 @@ export default function SummaryPage() {
   const [capturingId, setCapturingId] = useState<string | null>(null);
   const [capturingFull, setCapturingFull] = useState(false);
   const [venmoToast, setVenmoToast] = useState<string | null>(null);
-  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const cardRefs = useRef<Record<string, HTMLDivElement | null>>({}); // points to capturable content only
   const fullSummaryRef = useRef<HTMLDivElement | null>(null);
+  const receiptRef = useRef<HTMLDivElement | null>(null); // grand total + all person cards only
 
   const s = translations.summary;
   const fmtUSD = (n: number) => `$${n.toFixed(2)}`;
@@ -225,7 +226,7 @@ export default function SummaryPage() {
 
   const shareFullPage = useCallback(() => {
     captureAndShare(
-      fullSummaryRef.current,
+      receiptRef.current,
       'tipsplit-summary.png',
       () => setCapturingFull(true),
       () => setCapturingFull(false),
@@ -260,6 +261,8 @@ export default function SummaryPage() {
 
       {/* ── Capturable full-summary region ── */}
       <div ref={fullSummaryRef} className="px-4 space-y-4" style={{ paddingBottom: 4 }}>
+        {/* ── Capturable receipt region: total + all person cards ── */}
+        <div ref={receiptRef} className="space-y-4" style={{ background: 'var(--cream-bg)', padding: '0 0 4px' }}>
         {/* Grand total hero card */}
         <div
           className="rounded-xl2 p-4"
@@ -284,8 +287,7 @@ export default function SummaryPage() {
         <div className="space-y-3">
           {rows.map((row, idx) => (
             <div
-  key={row.id}
-              ref={(el) => { cardRefs.current[row.id] = el; }}
+              key={row.id}
               className="rounded-xl2 overflow-hidden animate-slide-up"
               style={{
                 background: 'var(--cream-card)', border: '1px solid var(--cream-border)',
@@ -293,8 +295,10 @@ export default function SummaryPage() {
                 animationDelay: `${idx * 60}ms`,
               }}
             >
-              <div className="h-1" style={{ background: row.color }} />
-              <div className="p-4">
+              {/* ── Capturable receipt card (no action buttons) ── */}
+              <div ref={(el) => { cardRefs.current[row.id] = el; }} style={{ background: 'var(--cream-card)' }}>
+                <div className="h-1.5" style={{ background: row.color }} />
+                <div className="p-4">
                 {/* Person header */}
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2.5">
@@ -343,8 +347,17 @@ export default function SummaryPage() {
                   )}
                 </div>
 
-                {/* Action buttons row */}
-                <div className="flex gap-2">
+                  {/* Branding footer inside capturable area */}
+                  <div className="mt-3 pt-2 border-t border-cream-border flex items-center justify-between">
+                    <span className="text-[10px] text-mocha-light opacity-50">TipSplit USA</span>
+                    {restaurantName ? <span className="text-[10px] text-mocha-light opacity-50 truncate max-w-[60%]">{restaurantName}</span> : null}
+                    <span className="text-[10px] text-mocha-light opacity-50">{new Date().toLocaleDateString()}</span>
+                  </div>
+                </div>{/* end p-4 */}
+              </div>{/* end capturable */}
+
+              {/* Action buttons — NOT included in screenshot */}
+              <div className="px-4 pb-4 flex gap-2">
                   <button
                     onClick={() => copy(buildShareText(row), row.id)}
                     className={clsx(
@@ -356,15 +369,7 @@ export default function SummaryPage() {
                   >
                     {copiedId === row.id ? t(s.copied, lang) : t(s.copyDetail, lang)}
                   </button>
-                  <button
-                    onClick={() => shareCardImage(row)}
-                    disabled={capturingId === row.id}
-                    className="px-3 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 flex items-center gap-1 bg-cream-deep border border-cream-border text-mocha-mid hover:border-accent-warm/50"
-                    title={lang === 'zh' || lang === 'sc' ? '截圖此人明細' : 'Share this card as image'}
-                  >
-                    {capturingId === row.id ? '⏳' : '📷'}
-                    <span className="text-[10px]">{lang === 'zh' || lang === 'sc' ? '截圖' : lang === 'ja' ? '画像' : lang === 'ko' ? '이미지' : lang === 'es' ? 'Img' : lang === 'pt' ? 'Img' : 'Img'}</span>
-                  </button>
+
                   <button
                     onClick={() => setShowQRFor(showQRFor === row.id ? null : row.id)}
                     className={clsx(
@@ -378,10 +383,10 @@ export default function SummaryPage() {
                     <span className="text-base">&#x25A6;</span>
                     <span>QR</span>
                   </button>
-                </div>
+              </div>{/* end action buttons row */}
 
-                {/* QR Code panel */}
-                {showQRFor === row.id && (
+              {/* QR Code panel */}
+              {showQRFor === row.id && (
                   <div className="mt-3 flex flex-col items-center gap-2 animate-slide-up">
                     <QRCodeCanvas text={buildQRText(row)} size={180} color={row.color} />
                     <p className="text-xs text-mocha-light text-center">
@@ -394,11 +399,11 @@ export default function SummaryPage() {
                         : 'Scan to confirm amount owed'}
                     </p>
                   </div>
-                )}
-              </div>
+              )}
             </div>
           ))}
         </div>
+        </div>{/* end receiptRef */}
 
         {/* Share panel */}
         <div className="card p-4">
