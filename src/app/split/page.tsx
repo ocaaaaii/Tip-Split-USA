@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAppStore } from '@/store/useAppStore';
 import BottomNav from '@/components/BottomNav';
@@ -11,18 +10,24 @@ import { t, translations } from '@/lib/i18n';
 import clsx from 'clsx';
 import HeaderBanner from '@/components/HeaderBanner';
 
+function r2(n: number) { return Math.round(n * 100) / 100; }
+
 export default function SplitPage() {
   const router = useRouter();
   const {
     splitMode, setSplitMode,
-    subtotal, taxAmount, tipAmount, totalAmount,
+    billAmount, taxRate, tipPercent, isTaxInclusive,
     guestCount, setGuestCount,
     displayCurrency, exchangeRates,
     lang,
   } = useAppStore();
 
-  // Re-compute on every mount so GPS/tax changes that fired during navigation are reflected
-  useEffect(() => { useAppStore.getState().computeAmounts(); }, []);
+  // Compute amounts directly from source values — never stale regardless of navigation timing
+  const raw      = parseFloat(billAmount) || 0;
+  const subtotal = isTaxInclusive ? r2(raw / (1 + taxRate / 100)) : r2(raw);
+  const taxAmount   = r2(subtotal * taxRate / 100);
+  const tipAmount   = r2(subtotal * tipPercent / 100);
+  const totalAmount = r2(subtotal + taxAmount + tipAmount);
 
   const s = translations.split;
   const fmtUSD = (n: number) => `$${n.toFixed(2)}`;
@@ -73,7 +78,7 @@ export default function SplitPage() {
           {(
             [
               { mode: 'even', icon: '👥', label: t(s.evenSplit, lang), sub: t(s.evenDesc, lang) },
-              { mode: 'itemized', icon: '🧾', label: t(s.itemized, lang), sub: t(s.itemDesc, lang) + (lang === 'zh' || lang === 'ja' || lang === 'ko' ? ' · 含🍷酒水分攤' : ' · incl. 🍷 alcohol split') },
+              { mode: 'itemized', icon: '🧾', label: t(s.itemized, lang), sub: t(s.itemDesc, lang) },
             ] as const
           ).map(({ mode, icon, label, sub }) => (
             <button
@@ -204,7 +209,6 @@ export default function SplitPage() {
           <button
             onClick={() => router.push('/itemized')}
             className="w-full py-4 rounded-xl2 font-bold text-white text-lg active:scale-[0.99] transition-transform"
-            style={{ background: 'linear-gradient(135deg, #688DA5 0%, #5A7A92 100%)' }}
           >
             {t(s.goItemized, lang)}
           </button>

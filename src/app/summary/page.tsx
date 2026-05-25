@@ -15,23 +15,34 @@ import { saveBill } from '@/lib/history';
 import QRCodeCanvas from '@/components/QRCodeCanvas';
 import html2canvas from 'html2canvas';
 
+function r2(n: number) { return Math.round(n * 100) / 100; }
+
 export default function SummaryPage() {
   const router = useRouter();
   const {
     splitMode, participants, receiptItems,
-    subtotal, taxAmount, tipAmount, totalAmount,
+    billAmount, isTaxInclusive,
     guestCount, displayCurrency, exchangeRates,
     restaurantName, tipPercent, lang,
     scenario, taxRate, locationName,
   } = useAppStore();
 
+  // Compute amounts directly from source values — never stale regardless of navigation timing
+  let subtotal: number;
+  if (splitMode === 'itemized' && receiptItems.length > 0) {
+    subtotal = r2(receiptItems.reduce((s, item) => s + item.price, 0));
+  } else {
+    const raw = parseFloat(billAmount) || 0;
+    subtotal = isTaxInclusive ? r2(raw / (1 + taxRate / 100)) : r2(raw);
+  }
+  const taxAmount   = r2(subtotal * taxRate / 100);
+  const tipAmount   = r2(subtotal * tipPercent / 100);
+  const totalAmount = r2(subtotal + taxAmount + tipAmount);
+
   const [showHistory, setShowHistory] = useState(false);
   const savedRef = useRef(false);
 
-  // Re-compute on mount in case GPS/tax changes fired during navigation
-  useEffect(() => { useAppStore.getState().computeAmounts(); }, []);
-
-  // Auto-save bill to LocalStorage on first mount
+  // Auto-save bill to LocalStorage on first mount (runs once, uses locally-computed values above)
   useEffect(() => {
     if (savedRef.current || totalAmount <= 0) return;
     savedRef.current = true;
@@ -522,11 +533,16 @@ export default function SummaryPage() {
             </div>
           )}
 
-          <p className="text-[10px] text-mocha-light mt-3 opacity-60">ko-fi.com/tipsplit</p>
+          <p className="text-[10px] text-mocha-light mt-3 opacity-60">ko-fi.com/tipsplitusa</p>
         </div>
+
         {/* Start over */}
         <button
-          onClick={() => router.push('/')}
+          onClick={() => {
+            useAppStore.getState().setBillAmount('');
+            useAppStore.getState().setReceiptItems([]);
+            router.push('/');
+          }}
           className="w-full py-3 rounded-xl border border-cream-border text-mocha-mid text-sm font-medium hover:border-accent-warm/50 active:scale-[0.99] transition-all"
         >
           {t(s.restart, lang)}
