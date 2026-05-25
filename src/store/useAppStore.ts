@@ -85,10 +85,11 @@ export interface AppState {
 // ---------------------------------------------------------------------------
 // Initial values read from storage (runs once at module load — client only)
 // ---------------------------------------------------------------------------
-const initBillAmount   = ss('tipsplit_bill')    ?? '';
+const initBillAmount   = ss('tipsplit_bill')      ?? '';
 const initTaxRate      = parseFloat(ss('tipsplit_taxrate') ?? '') || DEFAULT_TAX_RATE;
 const initTipPercent   = parseFloat(ss('tipsplit_tip')     ?? '') || 18;
 const initTaxInclusive = ss('tipsplit_taxincl') === 'true';
+const initGuestCount   = parseInt(ss('tipsplit_guests')    ?? '', 10) || 2;
 
 // ---------------------------------------------------------------------------
 // Store
@@ -116,7 +117,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   tipAmount: 0,
   customTipMode: false,
   scenario: 'restaurant',
-  guestCount: 2,
+  guestCount: initGuestCount,
   displayCurrency: (ls('tipsplit_currency') as CurrencyCode | null) ?? 'NONE',
   exchangeRates: FALLBACK_RATES,
   subtotal: 0,
@@ -157,7 +158,7 @@ export const useAppStore = create<AppState>((set, get) => ({
 
   setCustomTipMode: (v) => set({ customTipMode: v }),
   setScenario: (s) => set({ scenario: s }),
-  setGuestCount: (n) => set({ guestCount: n }),
+  setGuestCount: (n) => { ssSet('tipsplit_guests', String(n)); set({ guestCount: n }); },
 
   setDisplayCurrency: (c) => {
     lsSet('tipsplit_currency', c);

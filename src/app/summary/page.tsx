@@ -13,7 +13,7 @@ import HeaderBanner from '@/components/HeaderBanner';
 import HistorySheet from '@/components/HistorySheet';
 import { saveBill } from '@/lib/history';
 import QRCodeCanvas from '@/components/QRCodeCanvas';
-import html2canvas from 'html2canvas';
+import { toBlob } from 'html-to-image';
 
 function r2(n: number) { return Math.round(n * 100) / 100; }
 
@@ -182,26 +182,33 @@ export default function SummaryPage() {
     if (!el) return;
     onStart();
     try {
-      const canvas = await html2canvas(el, {
-        backgroundColor: '#EDE0C0',
-        scale: 2,
-        useCORS: true,
-        logging: false,
+      // Resolve all CSS custom properties to inline values before capture
+      // so html-to-image can see the real colours (it handles vars natively but
+      // a forced-style pass makes Safari/WebKit more reliable too).
+      const style = getComputedStyle(document.documentElement);
+      const varMap: Record<string, string> = {};
+      for (const key of Array.from(style)) {
+        if (key.startsWith('--')) varMap[key] = style.getPropertyValue(key).trim();
+      }
+      const blob = await toBlob(el, {
+        backgroundColor: varMap['--cream-bg'] || '#EDE0C0',
+        pixelRatio: 2,
+        // Provide CSS variable values so any platform that doesn't resolve them gets the right colours
+        style: Object.fromEntries(Object.entries(varMap)) as Record<string, string>,
+        cacheBust: true,
       });
-      canvas.toBlob(async (blob) => {
-        if (!blob) return;
-        const file = new File([blob], filename, { type: 'image/png' });
-        if (navigator.canShare?.({ files: [file] })) {
-          try { await navigator.share({ files: [file], title: 'TipSplit USA' }); } catch {}
-        } else {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url; a.download = filename; a.click();
-          URL.revokeObjectURL(url);
-        }
-      }, 'image/png');
+      if (!blob) return;
+      const file = new File([blob], filename, { type: 'image/png' });
+      if (navigator.canShare?.({ files: [file] })) {
+        try { await navigator.share({ files: [file], title: 'TipSplit USA' }); } catch {}
+      } else {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url; a.download = filename; a.click();
+        URL.revokeObjectURL(url);
+      }
     } catch (e) {
-      console.error(e);
+      console.error('captureAndShare error:', e);
     } finally {
       onEnd();
     }
@@ -536,7 +543,7 @@ export default function SummaryPage() {
           <p className="text-[10px] text-mocha-light mt-3 opacity-60">ko-fi.com/tipsplitusa</p>
         </div>
 
-        {/* Start over */}
+                {/* Start over */}
         <button
           onClick={() => {
             useAppStore.getState().setBillAmount('');
