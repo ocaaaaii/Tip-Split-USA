@@ -353,15 +353,18 @@ function TaxPickerModal({
       onClick={onClose}
     >
       <div
-        className="w-full max-w-[540px] rounded-t-2xl p-5 max-h-[82vh] overflow-y-auto"
+        className="w-full max-w-[540px] rounded-t-2xl max-h-[82vh] flex flex-col"
         style={{ background: 'var(--cream-card)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
+        {/* Header — fixed, never scrolls */}
+        <div className="flex items-center justify-between px-5 pt-5 pb-3 flex-shrink-0">
           <h3 className="font-bold text-mocha-dark text-lg">{t(c.selectTax, lang)}</h3>
           <button onClick={onClose} className="text-mocha-light text-xl px-2 hover:text-mocha-mid">✕</button>
         </div>
+
+        {/* Scrollable content */}
+        <div className="overflow-y-auto flex-1 px-5 pb-2">
 
         {/* ── GPS Detect ── */}
         <button
@@ -626,19 +629,22 @@ function TaxPickerModal({
             );
           })()}
         </div>
+        </div>{/* end scrollable content */}
 
-        {/* ── Disclaimer (all 6 languages) ── */}
-        <p className="text-[10px] text-mocha-light text-center opacity-60 mt-2 px-2">
-          ⚠️ {({
-            zh: '稅率為估算值（來源：CDTFA），正確稅率請以帳單為準',
-            sc: '税率为估算值（来源：CDTFA），正确税率请以账单为准',
-            ja: '税率は推定値です（出典：CDTFA）。正確な税率はレシートでご確認ください',
-            ko: '세율은 추정치입니다（출처：CDTFA）. 정확한 세율은 영수증을 확인하세요',
-            es: 'Las tasas son estimadas (CDTFA). Verifique siempre con su recibo',
-            pt: 'Taxas estimadas (CDTFA). Verifique sempre com o seu recibo',
-            en: 'Tax rates are estimates (CDTFA). Always verify with your receipt.',
-          } as Record<string, string>)[lang] ?? 'Tax rates are estimates (CDTFA). Always verify with your receipt.'}
-        </p>
+        {/* ── Disclaimer — sticky footer, always visible ── */}
+        <div className="flex-shrink-0 border-t px-5 py-2" style={{ borderColor: 'var(--cream-border)' }}>
+          <p className="text-[10px] text-mocha-light text-center opacity-70">
+            ⚠️ {({
+              zh: '稅率為估算值（來源：CDTFA），正確稅率請以帳單為準',
+              sc: '税率为估算值（来源：CDTFA），正确税率请以账单为准',
+              ja: '税率は推定値です（出典：CDTFA）。正確な税率はレシートでご確認ください',
+              ko: '세율은 추정치입니다（출처：CDTFA）. 정확한 세율은 영수증을 확인하세요',
+              es: 'Las tasas son estimadas (CDTFA). Verifique siempre con su recibo',
+              pt: 'Taxas estimadas (CDTFA). Verifique sempre com o seu recibo',
+              en: 'Tax rates are estimates (CDTFA). Always verify with your receipt.',
+            } as Record<string, string>)[lang] ?? 'Tax rates are estimates (CDTFA). Always verify with your receipt.'}
+          </p>
+        </div>
       </div>
     </div>
   );
