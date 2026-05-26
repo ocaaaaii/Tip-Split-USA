@@ -9,7 +9,7 @@ import LiveDisplay from '@/components/LiveDisplay';
 import AlertBanner from '@/components/AlertBanner';
 import BottomNav from '@/components/BottomNav';
 import AppFooter from '@/components/AppFooter';
-import { TAX_DATA, getTaxByGeo } from '@/data/taxRates';
+import { TAX_DATA, getTaxByGeo, getAllCitiesForState } from '@/data/taxRates';
 import { t, translations, type Lang } from '@/lib/i18n';
 import clsx from 'clsx';
 import HeaderBanner from '@/components/HeaderBanner';
@@ -287,6 +287,9 @@ function TaxPickerModal({
   const [geoStatus, setGeoStatus] = useState<GeoStatus>('idle');
   const [geoResult, setGeoResult] = useState<{ rate: number; location: string; confidence: string } | null>(null);
   const [geoError, setGeoError] = useState('');
+  // Cascading picker state
+  const [pickerState, setPickerState] = useState<string | null>(null);
+  const [pickerCounty, setPickerCounty] = useState<string | null>(null);
 
   const c = translations.calc;
 
@@ -459,33 +462,183 @@ function TaxPickerModal({
           </div>
         </div>
 
-        {/* ── State + City list ── */}
-        <div className="space-y-3">
-          {TAX_DATA.map((stateData) => (
-            <div key={stateData.stateCode}>
-              <p className="text-xs font-bold text-mocha-light uppercase tracking-wider mb-1.5 px-1">
-                {stateData.state} ({stateData.stateCode})
-              </p>
-              <div className="grid grid-cols-2 gap-1.5">
-                {stateData.cities.map((city) => (
+        {/* ── Cascading State → County → City picker ── */}
+        <div>
+          <p className="text-xs font-bold text-mocha-light uppercase tracking-wider mb-2 px-1">
+            {lang === 'zh' || lang === 'sc' ? '依城市選擇' : 'Browse by Location'}
+          </p>
+
+          {/* Breadcrumb trail */}
+          {(pickerState || pickerCounty) && (
+            <div className="flex items-center gap-1 mb-3 flex-wrap">
+              <button
+                onClick={() => { setPickerState(null); setPickerCounty(null); }}
+                className="text-xs px-2 py-1 rounded-lg bg-cream-bg border border-cream-border text-mocha-mid active:scale-95"
+              >
+                🌎 All States
+              </button>
+              {pickerState && (
+                <>
+                  <span className="text-mocha-light text-xs">›</span>
                   <button
-                    key={city.name}
-                    onClick={() => onSelect(city.totalTax, `${city.name}, ${stateData.stateCode}`)}
-                    className={clsx(
-                      'flex items-center justify-between px-3 py-2 rounded-lg text-sm border transition-colors active:scale-95',
-                      city.totalTax === currentRate
-                        ? 'bg-accent-warm/10 border-accent-warm text-accent-warm font-bold'
-                        : 'bg-cream-bg border-cream-border text-mocha-dark hover:border-accent-warm/50'
-                    )}
+                    onClick={() => setPickerCounty(null)}
+                    className="text-xs px-2 py-1 rounded-lg bg-cream-bg border border-accent-warm/40 text-accent-warm font-medium active:scale-95"
                   >
-                    <span className="truncate">{city.name}</span>
-                    <span className="font-bold text-xs ml-1 flex-shrink-0">{city.totalTax}%</span>
+                    {TAX_DATA.find(s => s.stateCode === pickerState)?.state}
                   </button>
-                ))}
-              </div>
+                </>
+              )}
+              {pickerCounty && (
+                <>
+                  <span className="text-mocha-light text-xs">›</span>
+                  <span className="text-xs px-2 py-1 rounded-lg bg-accent-warm/10 text-accent-warm font-medium">
+                    {pickerCounty}
+                  </span>
+                </>
+              )}
             </div>
-          ))}
+          )}
+
+          {/* Level 1: State list */}
+          {!pickerState && (
+            <div className="grid grid-cols-2 gap-1.5">
+              {TAX_DATA.filter(s => s.cities.length > 0 || (s.counties?.length ?? 0) > 0).map((stateData) => (
+                <button
+                  key={stateData.stateCode}
+                  onClick={() => { setPickerState(stateData.stateCode); setPickerCounty(null); }}
+                  className="flex items-center justify-between px-3 py-2.5 rounded-lg text-sm border transition-colors active:scale-95 bg-cream-bg border-cream-border text-mocha-dark hover:border-accent-warm/50"
+                >
+                  <span className="font-medium">{stateData.state}</span>
+                  <span className="text-xs text-mocha-light">{stateData.stateCode} {stateData.baseTax === 0 ? '🎉 No tax' : `${stateData.baseTax}%+`}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {/* Level 2: Counties (if state has counties) or cities directly */}
+          {pickerState && !pickerCounty && (() => {
+            const stateData = TAX_DATA.find(s => s.stateCode === pickerState)!;
+            const hasCounties = (stateData.counties?.length ?? 0) > 0;
+            if (hasCounties) {
+              return (
+                <div className="space-y-1.5">
+                  {stateData.counties!.map((county) => (
+                    <button
+                      key={county.name}
+                      onClick={() => setPickerCounty(county.name)}
+                      className="w-full flex items-center justify-between px-4 py-3 rounded-xl text-sm border transition-colors active:scale-95 bg-cream-bg border-cream-border text-mocha-dark hover:border-accent-warm/50"
+                    >
+                      <div className="text-left">
+                        <p className="font-semibold">{county.name}</p>
+                        <p className="text-xs text-mocha-light">{county.cities.length} cities</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-xs font-bold text-mocha-mid">{county.countyTax}%</p>
+                        <p className="text-xs text-mocha-light">unincorporated</p>
+                      </div>
+                    </button>
+                  ))}
+                  {/* Also show flat cities not in counties */}
+                  {stateData.cities.length > 0 && (
+                    <div className="grid grid-cols-2 gap-1.5 mt-2">
+                      {stateData.cities.map((city) => (
+                        <button
+                          key={city.name}
+                          onClick={() => onSelect(city.totalTax, `${city.name}, ${stateData.stateCode}`)}
+                          className={clsx(
+                            'flex items-center justify-between px-3 py-2 rounded-lg text-sm border transition-colors active:scale-95',
+                            city.totalTax === currentRate
+                              ? 'bg-accent-warm/10 border-accent-warm text-accent-warm font-bold'
+                              : 'bg-cream-bg border-cream-border text-mocha-dark hover:border-accent-warm/50'
+                          )}
+                        >
+                          <span className="truncate">{city.name}</span>
+                          <span className="font-bold text-xs ml-1 flex-shrink-0">{city.totalTax}%</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              );
+            } else {
+              // No counties — show cities directly
+              return (
+                <div className="grid grid-cols-2 gap-1.5">
+                  {stateData.cities.map((city) => (
+                    <button
+                      key={city.name}
+                      onClick={() => onSelect(city.totalTax, `${city.name}, ${stateData.stateCode}`)}
+                      className={clsx(
+                        'flex items-center justify-between px-3 py-2 rounded-lg text-sm border transition-colors active:scale-95',
+                        city.totalTax === currentRate
+                          ? 'bg-accent-warm/10 border-accent-warm text-accent-warm font-bold'
+                          : 'bg-cream-bg border-cream-border text-mocha-dark hover:border-accent-warm/50'
+                      )}
+                    >
+                      <span className="truncate">{city.name}</span>
+                      <span className="font-bold text-xs ml-1 flex-shrink-0">{city.totalTax}%</span>
+                    </button>
+                  ))}
+                </div>
+              );
+            }
+          })()}
+
+          {/* Level 3: Cities in selected county */}
+          {pickerState && pickerCounty && (() => {
+            const stateData = TAX_DATA.find(s => s.stateCode === pickerState)!;
+            const countyData = stateData.counties?.find(c => c.name === pickerCounty);
+            if (!countyData) return null;
+            const sorted = [...countyData.cities].sort((a, b) => a.name.localeCompare(b.name));
+            return (
+              <div className="space-y-2">
+                {/* County-wide / unincorporated button */}
+                <button
+                  onClick={() => onSelect(countyData.countyTax, `${countyData.name} (unincorporated), ${stateData.stateCode}`)}
+                  className={clsx(
+                    'w-full flex items-center justify-between px-4 py-2.5 rounded-xl text-sm border transition-colors active:scale-95',
+                    countyData.countyTax === currentRate
+                      ? 'bg-accent-warm/10 border-accent-warm text-accent-warm font-bold'
+                      : 'bg-cream-deep border-cream-border text-mocha-mid hover:border-accent-warm/50'
+                  )}
+                >
+                  <span className="font-medium italic">📍 Unincorporated {countyData.name}</span>
+                  <span className="font-bold">{countyData.countyTax}%</span>
+                </button>
+                <div className="grid grid-cols-2 gap-1.5">
+                  {sorted.map((city) => (
+                    <button
+                      key={city.name}
+                      onClick={() => onSelect(city.totalTax, `${city.name}, ${stateData.stateCode}`)}
+                      className={clsx(
+                        'flex items-center justify-between px-3 py-2 rounded-lg text-sm border transition-colors active:scale-95',
+                        city.totalTax === currentRate
+                          ? 'bg-accent-warm/10 border-accent-warm text-accent-warm font-bold'
+                          : 'bg-cream-bg border-cream-border text-mocha-dark hover:border-accent-warm/50'
+                      )}
+                    >
+                      <span className="truncate text-xs">{city.name}</span>
+                      <span className="font-bold text-xs ml-1 flex-shrink-0">{city.totalTax}%</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </div>
+
+        {/* ── Disclaimer (all 6 languages) ── */}
+        <p className="text-[10px] text-mocha-light text-center opacity-60 mt-2 px-2">
+          ⚠️ {({
+            zh: '稅率為估算值（來源：CDTFA），正確稅率請以帳單為準',
+            sc: '税率为估算值（来源：CDTFA），正确税率请以账单为准',
+            ja: '税率は推定値です（出典：CDTFA）。正確な税率はレシートでご確認ください',
+            ko: '세율은 추정치입니다（출처：CDTFA）. 정확한 세율은 영수증을 확인하세요',
+            es: 'Las tasas son estimadas (CDTFA). Verifique siempre con su recibo',
+            pt: 'Taxas estimadas (CDTFA). Verifique sempre com o seu recibo',
+            en: 'Tax rates are estimates (CDTFA). Always verify with your receipt.',
+          } as Record<string, string>)[lang] ?? 'Tax rates are estimates (CDTFA). Always verify with your receipt.'}
+        </p>
       </div>
     </div>
   );
